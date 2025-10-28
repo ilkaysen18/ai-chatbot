@@ -103,7 +103,7 @@
                     </svg>
                 </div>
                 <h1 class="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary via-sage-500 to-sage-600 bg-clip-text text-transparent">
-                    TaskWizard
+                    Sage AI
                 </h1>
             </div>
             <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-1">
@@ -122,7 +122,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                     </svg>
                 </div>
-                <p class="text-lg font-medium mb-2">Hello! This is TaskWizard AI</p>
+                <p class="text-lg font-medium mb-2">Hello! I'm TaskWizard </p>
                 <p class="text-sm">Ask me anything - I'm here to help!</p>
             </div>
         </div>
@@ -178,21 +178,26 @@
         let isProcessing = false;
         let currentMessageId = null;
 
-        // Register handler for streaming responses
-        window.Poe.registerHandler("sage-handler", (result, context) => {
-            const msg = result.responses[0];
+        // Check if running in Poe environment
+        const isPoeEnvironment = window.Poe && window.Poe.registerHandler;
 
-            if (msg.status === "error") {
-                updateBotMessage(context.messageId, `I apologize, but I encountered an error: ${msg.statusText}`, true, true);
-            } else if (msg.status === "incomplete") {
-                updateBotMessage(context.messageId, msg.content, false, false);
-            } else if (msg.status === "complete") {
-                updateBotMessage(context.messageId, msg.content, false, true);
-                isProcessing = false;
-                sendButton.disabled = false;
-                messageInput.disabled = false;
-            }
-        });
+        // Register handler for streaming responses (only in Poe)
+        if (isPoeEnvironment) {
+            window.Poe.registerHandler("sage-handler", (result, context) => {
+                const msg = result.responses[0];
+
+                if (msg.status === "error") {
+                    updateBotMessage(context.messageId, `I apologize, but I encountered an error: ${msg.statusText}`, true, true);
+                } else if (msg.status === "incomplete") {
+                    updateBotMessage(context.messageId, msg.content, false, false);
+                } else if (msg.status === "complete") {
+                    updateBotMessage(context.messageId, msg.content, false, true);
+                    isProcessing = false;
+                    sendButton.disabled = false;
+                    messageInput.disabled = false;
+                }
+            });
+        }
 
         // Add user message to chat
         function addUserMessage(text) {
@@ -278,6 +283,19 @@
 
             currentMessageId = `msg-${Date.now()}`;
 
+            // Check if running in Poe environment
+            if (!isPoeEnvironment) {
+                // Demo mode for local testing
+                updateBotMessage(currentMessageId, "This is a demo response. To use the full AI chatbot, please upload this app to Poe as a Canvas App.\n\nYou asked: \"" + text + "\"", false, false);
+                setTimeout(() => {
+                    updateBotMessage(currentMessageId, "This is a demo response. To use the full AI chatbot, please upload this app to Poe as a Canvas App.\n\nYou asked: \"" + text + "\"\n\nVisit [Poe.com](https://poe.com) to get started!", false, true);
+                    isProcessing = false;
+                    sendButton.disabled = false;
+                    messageInput.disabled = false;
+                }, 1000);
+                return;
+            }
+
             try {
                 await window.Poe.sendUserMessage(`@Claude-Sonnet-4.5 ${text}`, {
                     handler: "sage-handler",
@@ -302,7 +320,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
                     </div>
-                    <p class="text-lg font-medium mb-2">Hello! This is TaskWizard AI</p>
+                    <p class="text-lg font-medium mb-2">Hello! I'm Sage AI</p>
                     <p class="text-sm">Ask me anything - I'm here to help!</p>
                 </div>
             `;
