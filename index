@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sage AI - Your Intelligent Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        sage: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .message-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .chat-container {
+            height: calc(100vh - 220px);
+        }
+        @media (max-width: 640px) {
+            .chat-container {
+                height: calc(100vh - 240px);
+            }
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            font-weight: 600;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+        .markdown-content p {
+            margin-bottom: 0.75em;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 1.5em;
+            margin-bottom: 0.75em;
+        }
+        .markdown-content li {
+            margin-bottom: 0.25em;
+        }
+        .markdown-content code {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .dark .markdown-content code {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .markdown-content pre {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 1em;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 0.75em;
+        }
+        .dark .markdown-content pre {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .typing-indicator {
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        .logo-gradient {
+            background: linear-gradient(135deg, #5D5CDE 0%, #0ea5e9 100%);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-[#181818] text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <div class="max-w-4xl mx-auto p-4 sm:p-6">
+        <!-- Header -->
+        <div class="mb-6 text-center">
+            <div class="flex items-center justify-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded-full logo-gradient flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary via-sage-500 to-sage-600 bg-clip-text text-transparent">
+                    Sage AI
+                </h1>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base mb-1">
+                Your intelligent assistant for any question
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-500">
+                Powered by Claude Sonnet 4.5
+            </p>
+        </div>
+
+        <!-- Chat Container -->
+        <div id="chatContainer" class="chat-container overflow-y-auto mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-900/50 scroll-smooth shadow-inner">
+            <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-full logo-gradient flex items-center justify-center shadow-lg opacity-80">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <p class="text-lg font-medium mb-2">Hello! I'm Sage AI</p>
+                <p class="text-sm">Ask me anything - I'm here to help!</p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="flex gap-2 mb-3">
+            <input
+                type="text"
+                id="messageInput"
+                placeholder="Ask Sage anything..."
+                class="flex-1 px-4 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
+            >
+            <button
+                id="sendButton"
+                class="px-6 py-3 logo-gradient text-white rounded-xl hover:opacity-90 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-900 shadow-md"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Clear Chat Button -->
+        <div class="text-center">
+            <button
+                id="clearButton"
+                class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors px-4 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+                Clear Chat
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode detection and setup
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // DOM elements
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const clearButton = document.getElementById('clearButton');
+
+        let isProcessing = false;
+        let currentMessageId = null;
+
+        // Register handler for streaming responses
+        window.Poe.registerHandler("sage-handler", (result, context) => {
+            const msg = result.responses[0];
+
+            if (msg.status === "error") {
+                updateBotMessage(context.messageId, `I apologize, but I encountered an error: ${msg.statusText}`, true, true);
+            } else if (msg.status === "incomplete") {
+                updateBotMessage(context.messageId, msg.content, false, false);
+            } else if (msg.status === "complete") {
+                updateBotMessage(context.messageId, msg.content, false, true);
+                isProcessing = false;
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+            }
+        });
+
+        // Add user message to chat
+        function addUserMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'mb-4 message-fade-in';
+            messageDiv.innerHTML = `
+                <div class="flex justify-end">
+                    <div class="max-w-[85%] sm:max-w-[75%]">
+                        <div class="px-4 py-3 logo-gradient text-white rounded-2xl rounded-tr-sm shadow-md">
+                            <p class="text-sm sm:text-base break-words">${escapeHtml(text)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Remove welcome message if present
+            const welcomeMsg = chatContainer.querySelector('.text-center');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            chatContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Add or update bot message
+        function updateBotMessage(messageId, content, isError = false, isComplete = false) {
+            let messageDiv = document.getElementById(`msg-${messageId}`);
+
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = `msg-${messageId}`;
+                messageDiv.className = 'mb-4 message-fade-in';
+                chatContainer.appendChild(messageDiv);
+            }
+
+            const statusIndicator = isComplete ? '' : `
+                <div class="flex items-center gap-1 mt-2">
+                    <div class="w-2 h-2 bg-primary rounded-full typing-indicator"></div>
+                    <div class="w-2 h-2 bg-sage-500 rounded-full typing-indicator" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-sage-600 rounded-full typing-indicator" style="animation-delay: 0.4s"></div>
+                </div>
+            `;
+
+            const bgColor = isError ? 'bg-red-100 dark:bg-red-900' : 'bg-gray-200 dark:bg-gray-800';
+            const textColor = isError ? 'text-red-900 dark:text-red-100' : 'text-gray-900 dark:text-gray-100';
+
+            const renderedContent = isError ? escapeHtml(content) : marked.parse(content);
+
+            messageDiv.innerHTML = `
+                <div class="flex justify-start">
+                    <div class="max-w-[85%] sm:max-w-[75%]">
+                        <div class="flex items-center gap-2 mb-1 ml-1">
+                            <div class="w-6 h-6 rounded-full logo-gradient flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Sage</span>
+                        </div>
+                        <div class="px-4 py-3 ${bgColor} ${textColor} rounded-2xl rounded-tl-sm shadow-md">
+                            <div class="markdown-content text-sm sm:text-base break-words">${renderedContent}</div>
+                            ${statusIndicator}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            scrollToBottom();
+        }
+
+        // Send message
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text || isProcessing) return;
+
+            isProcessing = true;
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+
+            addUserMessage(text);
+            messageInput.value = '';
+
+            currentMessageId = `msg-${Date.now()}`;
+
+            try {
+                await window.Poe.sendUserMessage(`@Claude-Sonnet-4.5 ${text}`, {
+                    handler: "sage-handler",
+                    stream: true,
+                    openChat: false,
+                    handlerContext: { messageId: currentMessageId }
+                });
+            } catch (err) {
+                updateBotMessage(currentMessageId, `I apologize, but something went wrong: ${err.message || err}`, true, true);
+                isProcessing = false;
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+            }
+        }
+
+        // Clear chat
+        function clearChat() {
+            chatContainer.innerHTML = `
+                <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-full logo-gradient flex items-center justify-center shadow-lg opacity-80">
+                        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-lg font-medium mb-2">Hello! I'm Sage AI</p>
+                    <p class="text-sm">Ask me anything - I'm here to help!</p>
+                </div>
+            `;
+        }
+
+        // Utility functions
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        clearButton.addEventListener('click', clearChat);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Focus input on load
+        messageInput.focus();
+    </script>
+</body>
+</html>
