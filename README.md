@@ -1,7 +1,7 @@
 
 # TaskWizard
 
-A modern AI chatbot interface powered by Claude Sonnet 4.5. 
+A modern AI chatbot interface powered by Wikipedia. 
 
 
 ## Features
