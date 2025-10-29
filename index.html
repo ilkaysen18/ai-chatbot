@@ -178,13 +178,13 @@
         let isProcessing = false;
         let currentMessageId = null;
 
-        // Check if running in Poe environment
-        const isPoeEnvironment = window.Poe && window.Poe.registerHandler;
+        // Check if running in Chrome environment
+        const isChromeEnvironment = window.window.Chrome && window.Chrome.registerHandler;
 
-        // Register handler for streaming responses (only in Poe)
-        if (isPoeEnvironment) {
-            window.Poe.registerHandler("sage-handler", (result, context) => {
-                const msg = result.responses[0];
+        // Register handler for streaming responses (only in Chrome)
+        if (isChromeEnvironment) {
+            window.Chrome.registerHandler("TaskWizard-handler", (result, context) => {
+                const msg = result.responses[];
 
                 if (msg.status === "error") {
                     updateBotMessage(context.messageId, `I apologize, but I encountered an error: ${msg.statusText}`, true, true);
@@ -341,8 +341,8 @@ Please provide a comprehensive answer based on the Wikipedia information above. 
             promptToSend = text;
         }
 
-        await window.Poe.sendUserMessage(`@Claude-Sonnet-4.5 ${promptToSend}`, {
-            handler: "sage-handler",
+        await window.Chrome.sendUserMessage(`@Claude-Sonnet-4.5 ${promptToSend}`, {
+            handler: "TaskWizard-handler",
             stream: true,
             openChat: false,
             handlerContext: { messageId: currentMessageId }
