@@ -74,7 +74,7 @@
 
   <div id="output" hidden>
     <h2>Answer</h2>
-    <p id="answerText">Loading...</p>
+    <p id="answerText">Tasking... 🪄</p>
     <p class="small" id="sourcesText"></p>
   </div>
 
@@ -90,6 +90,15 @@
       return data.extract || "";
     }
 
+    async function getEngooSummary(query) {
+      const res = await fetch(
+        `https://share.google/6IkDW2yKjmR0cIFVF/api/rest_v1/page/summary/${encodeURIComponent(query)}`
+      );
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data.extract || "";
+    }
+    
     async function getMyLibraryResources(query) {
       // Your own JSON or REST endpoint (modify URL to your setup)
       const res = await fetch(
