@@ -269,47 +269,91 @@
             scrollToBottom();
         }
 
-        // Send message
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || isProcessing) return;
+// Fetch Wikipedia data for a query
+async function fetchWikipediaData(query) {
+    try {
+        // Search for relevant Wikipedia articles
+        const searchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&format=json&origin=*`;
+        const searchResponse = await fetch(searchUrl);
+        const searchData = await searchResponse.json();
 
-            isProcessing = true;
-            sendButton.disabled = true;
-            messageInput.disabled = true;
-
-            addUserMessage(text);
-            messageInput.value = '';
-
-            currentMessageId = `msg-${Date.now()}`;
-
-            // Check if running in Poe environment
-            if (!isPoeEnvironment) {
-                // Demo mode for local testing
-                updateBotMessage(currentMessageId, "This is a demo response. To use the full AI chatbot, please upload this app to Poe as a Canvas App.\n\nYou asked: \"" + text + "\"", false, false);
-                setTimeout(() => {
-                    updateBotMessage(currentMessageId, "This is a demo response. To use the full AI chatbot, please upload this app to Poe as a Canvas App.\n\nYou asked: \"" + text + "\"\n\nVisit [Poe.com](https://poe.com) to get started!", false, true);
-                    isProcessing = false;
-                    sendButton.disabled = false;
-                    messageInput.disabled = false;
-                }, 1000);
-                return;
-            }
-
-            try {
-                await window.Poe.sendUserMessage(`@Claude-Sonnet-4.5 ${text}`, {
-                    handler: "sage-handler",
-                    stream: true,
-                    openChat: false,
-                    handlerContext: { messageId: currentMessageId }
-                });
-            } catch (err) {
-                updateBotMessage(currentMessageId, `I apologize, but something went wrong: ${err.message || err}`, true, true);
-                isProcessing = false;
-                sendButton.disabled = false;
-                messageInput.disabled = false;
-            }
+        if (searchData[1].length === 0) {
+            return null; // No results found
         }
+
+        const articleTitle = searchData[1][0];
+
+        // Fetch article content
+        const contentUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(articleTitle)}&prop=extracts&exintro=true&explaintext=true&format=json&origin=*`;
+        const contentResponse = await fetch(contentUrl);
+        const contentData = await contentResponse.json();
+
+        const pages = contentData.query.pages;
+        const pageId = Object.keys(pages)[0];
+        const extract = pages[pageId].extract;
+
+        return {
+            title: articleTitle,
+            content: extract,
+            url: `https://en.wikipedia.org/wiki/${encodeURIComponent(articleTitle.replace(/ /g, '_'))}`
+        };
+    } catch (error) {
+        console.error('Wikipedia fetch error:', error);
+        return null;
+    }
+}
+
+// Replace your existing sendMessage() function with this:
+
+async function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text || isProcessing) return;
+
+    isProcessing = true;
+    sendButton.disabled = true;
+    messageInput.disabled = true;
+
+    addUserMessage(text);
+    messageInput.value = '';
+
+    currentMessageId = `msg-${Date.now()}`;
+
+    try {
+        // Fetch Wikipedia data
+        const wikiData = await fetchWikipediaData(text);
+
+        let promptToSend;
+        if (wikiData) {
+            // Include Wikipedia context in the prompt
+            promptToSend = `Using the following Wikipedia information as reference, please answer the user's question.
+
+Wikipedia Article: "${wikiData.title}"
+Source: ${wikiData.url}
+
+Content:
+${wikiData.content}
+
+User Question: ${text}
+
+Please provide a comprehensive answer based on the Wikipedia information above. If the information doesn't fully answer the question, mention what additional context might be needed.`;
+        } else {
+            // No Wikipedia data found, send original query
+            promptToSend = text;
+        }
+
+        await window.Poe.sendUserMessage(`@Claude-Sonnet-4.5 ${promptToSend}`, {
+            handler: "sage-handler",
+            stream: true,
+            openChat: false,
+            handlerContext: { messageId: currentMessageId }
+        });
+    } catch (err) {
+        updateBotMessage(currentMessageId, `I apologize, but something went wrong: ${err.message || err}`, true, true);
+        isProcessing = false;
+        sendButton.disabled = false;
+        messageInput.disabled = false;
+    }
+}
 
         // Clear chat
         function clearChat() {
