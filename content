@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Wikipedia ESL & Article Generator</title>
+</head>
+<body>
+  <h3>Wikipedia Content & ESL Generator</h3>
+  <input id="topic" placeholder="Enter topic (e.g. Istanbul)" />
+  <button onclick="generate()">Generate</button>
+
+  <h4>Title</h4>
+  <p id="title" style="font-weight:bold;"></p>
+
+  <h4>Summary</h4>
+  <p id="summary" style="white-space:pre-wrap;"></p>
+
+  <h4>Short Article / News</h4>
+  <p id="article" style="white-space:pre-wrap;"></p>
+
+  <h4>ESL Questions</h4>
+  <ul id="questions"></ul>
+
+  <h4>Vocabulary</h4>
+  <ul id="vocab"></ul>
+
+  <h4>Agree/Disagree Sentences</h4>
+  <ul id="agree"></ul>
+
+  <h4>Common Collocations</h4>
+  <ul id="collocations"></ul>
+
+  <h4>Discussion Questions</h4>
+  <ul id="discussion"></ul>
+
+  <h4>Conversational Questions</h4>
+  <ul id="conversation"></ul>
+
+  <h4>If-Conditional Questions</h4>
+  <ul id="ifquestions"></ul>
+
+  <small id="source" style="display:block;margin-top:0.5rem;color:#666;"></small>
+
+  <script>
+    async function fetchWikiText(title) {
+      const url = `https://en.wikipedia.org/w/api.php?origin=*&action=query&prop=extracts&explaintext=1&format=json&titles=${encodeURIComponent(title)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const pages = data.query?.pages;
+      const page = pages ? Object.values(pages)[0] : {};
+      return page.extract || "";
+    }
+
+    function generateTitle(text, topic) {
+      if (!text) return `About ${topic}`;
+      const firstSent = text.split(/(?<=[.?!])\s+/)[0] || topic;
+      // pick up to 6 words for title
+      const words = firstSent.split(" ").slice(0,6);
+      return words.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+    }
+
+    function rewriteSummary(text) {
+      if (!text) return "No info found.";
+      const sents = text.split(/(?<=[.?!])\s+/).filter(s => s.length > 40);
+      const chosen = sents.slice(0, 8).sort(() => Math.random() - 0.5).slice(0, 3);
+      const syn = { "is": "remains", "was": "stood as", "located": "situated", "city": "metropolis", "known": "recognized" };
+      const out = chosen.map(s => s.split(/\b/).map(tok => syn[tok.toLowerCase()] || tok).join(""));
+      return out.join(" ");
+    }
+
+    function generateShortArticle(text, topic) {
+      if (!text) return "";
+      const sents = text.split(/(?<=[.?!])\s+/).filter(s => s.length>30);
+      const chosen = sents.slice(0,6).sort(()=>Math.random()-0.5).slice(0,3);
+      const article = `Breaking: ${topic} news — ${chosen.join(" ")}.`;
+      return article;
+    }
+
+    function generateESLQuestions(text) {
+      const sents = text.split(/(?<=[.?!])\s+/).filter(s => s.length > 40).slice(0, 5);
+      const questions = [];
+      for (let i = 0; i < Math.min(3, sents.length); i++) {
+        const sent = sents[i];
+        const keywords = sent.match(/\b[A-Z][a-z]+/g) || [];
+        const keyword = keywords[0] || "this topic";
+        questions.push(`Q${i + 1}. What can you tell about ${keyword}?`);
+      }
+      return questions;
+    }
+
+    function extractVocabulary(text) {
+      const words = text.toLowerCase().match(/\b[a-z]{6,}\b/g) || [];
+      const freq = {};
+      words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+      const sorted = Object.keys(freq).sort((a, b) => freq[b] - freq[a]);
+      const common = ["wikipedia","article","which","there","people","country","cities"];
+      return sorted.filter(w => !common.includes(w)).slice(0, 5);
+    }
+
+    function generateAgreeDisagree(text) {
+      const sents = text.split(/(?<=[.?!])\s+/).slice(0,3);
+      return sents.map(s => `Do you agree or disagree: "${s.trim()}"`);
+    }
+
+    function generateCollocations(text) {
+      const words = text.split(/\s+/).filter(w => w.length>3);
+      const collocs = [];
+      for(let i=0;i<words.length-1;i+=Math.floor(words.length/6)){
+        collocs.push(words[i] + " " + words[i+1]);
+      }
+      return collocs.slice(0,5);
+    }
+
+    function generateDiscussionQuestions(text) {
+      const sents = text.split(/(?<=[.?!])\s+/).slice(0,4);
+      return sents.map(s=>`Discuss: ${s.trim()}`);
+    }
+
+    function generateConversationQuestions(text) {
+      const sents = text.split(/(?<=[.?!])\s+/).slice(0,4);
+      return sents.map(s=>`In pairs, talk about: ${s.trim()}`);
+    }
+
+    function generateIfQuestions(text) {
+      const sents = text.split(/(?<=[.?!])\s+/).slice(0,4);
+      return sents.map(s=>`If ${s.split(" ")[0]} happens, what would you do?`);
+    }
+
+    async function generate() {
+      const topic = document.getElementById("topic").value.trim();
+      if (!topic) { document.getElementById("summary").textContent = "Enter a topic."; return; }
+
+      document.getElementById("summary").textContent = "Loading…";
+      ["questions","vocab","agree","collocations","discussion","conversation","ifquestions","title","article"].forEach(id => {
+        document.getElementById(id).innerHTML="";
+      });
+
+      const text = await fetchWikiText(topic);
+
+      document.getElementById("title").textContent = generateTitle(text, topic);
+      document.getElementById("summary").textContent = rewriteSummary(text);
+      document.getElementById("article").textContent = generateShortArticle(text, topic);
+      document.getElementById("questions").innerHTML = generateESLQuestions(text).map(q=>`<li>${q}</li>`).join("");
+      document.getElementById("vocab").innerHTML = extractVocabulary(text).map(v=>`<li>${v}</li>`).join("");
+      document.getElementById("agree").innerHTML = generateAgreeDisagree(text).map(a=>`<li>${a}</li>`).join("");
+      document.getElementById("collocations").innerHTML = generateCollocations(text).map(c=>`<li>${c}</li>`).join("");
+      document.getElementById("discussion").innerHTML = generateDiscussionQuestions(text).map(d=>`<li>${d}</li>`).join("");
+      document.getElementById("conversation").innerHTML = generateConversationQuestions(text).map(c=>`<li>${c}</li>`).join("");
+      document.getElementById("ifquestions").innerHTML = generateIfQuestions(text).map(i=>`<li>${i}</li>`).join("");
+
+      document.getElementById("source").innerHTML =
+        text ? `Source: Wikipedia (content for “${escapeHtml(topic)}”).` : "No Wikipedia data found.";
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+  </script>
+</body>
+</html>
