@@ -12,4 +12,4 @@ A modern AI chatbot interface powered by Wikipedia.
 
 
 ## See website here:
-[TaskWizard AI](https://ilkaysen18.github.io/ai-chatbot/wiki-ai.html)
+[TaskWizard AI](https://ilkaysen18.github.io/ai-chatbot/)
