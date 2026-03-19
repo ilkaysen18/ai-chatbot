@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadPulse &mdash; Learn Real English</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          navy: '#0a1f7a',
+          gold: '#F9D423',
+          sky: '#1E90FF',
+        }
+      }
+    }
+  };
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body { font-family: 'Source Sans 3', sans-serif; }
+
+  .bg-gradient-hero {
+    background: linear-gradient(135deg, #F9D423 0%, #1E90FF 100%);
+  }
+
+  .insight-card {
+    transition: all 0.3s ease;
+    background: #fffdf5;
+    border: 2px solid transparent;
+    background-image: linear-gradient(#fffdf5, #fffdf5), linear-gradient(135deg, #F9D423, #1E90FF);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--source-color, #1E90FF);
+  }
+  .insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 144, 255, 0.15);
+  }
+  .dark .insight-card {
+    background: #1e1e1e;
+    background-image: linear-gradient(#1e1e1e, #1e1e1e), linear-gradient(135deg, #F9D423, #1E90FF);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .discussion-box {
+    background: linear-gradient(135deg, rgba(249,212,35,0.08), rgba(30,144,255,0.08));
+    border-left: 4px solid #1E90FF;
+  }
+  .dark .discussion-box {
+    background: linear-gradient(135deg, rgba(249,212,35,0.06), rgba(30,144,255,0.06));
+    border-left: 4px solid #F9D423;
+  }
+
+  .vocab-tag {
+    background: rgba(249,212,35,0.15);
+    color: #0a1f7a;
+    border: 1px solid rgba(249,212,35,0.4);
+  }
+  .dark .vocab-tag {
+    background: rgba(249,212,35,0.1);
+    color: #F9D423;
+    border: 1px solid rgba(249,212,35,0.3);
+  }
+
+  .gen-btn {
+    background: linear-gradient(135deg, #F9D423, #1E90FF);
+    color: #0a1f7a;
+    transition: all 0.25s ease;
+  }
+  .gen-btn:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.35);
+    transform: translateY(-1px);
+  }
+  .gen-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+  .topic-pill { transition: all 0.2s ease; cursor: pointer; }
+  .topic-pill.active {
+    background: linear-gradient(135deg, #F9D423, #1E90FF);
+    color: #0a1f7a;
+    font-weight: 700;
+    border-color: transparent;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+  .dark .skeleton {
+    background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.5s ease both; }
+
+  .search-input:focus {
+    border-color: #1E90FF;
+    box-shadow: 0 0 0 3px rgba(30,144,255,0.2);
+  }
+  .dark .search-input:focus {
+    border-color: #F9D423;
+    box-shadow: 0 0 0 3px rgba(249,212,35,0.15);
+  }
+
+  .pulse-dot { animation: pulseDot 2s ease infinite; }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(30,144,255,0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(30,144,255,0); }
+  }
+
+  .error-box {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .dark .error-box { background: rgba(239,68,68,0.1); }
+
+  .source-link {
+    background: linear-gradient(135deg, #F9D423, #1E90FF);
+    color: #0a1f7a;
+    transition: all 0.2s ease;
+  }
+  .source-link:hover {
+    box-shadow: 0 4px 12px rgba(30,144,255,0.3);
+    transform: translateY(-1px);
+  }
+
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .thumb-img {
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid rgba(249,212,35,0.3);
+  }
+
+  @keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .status-pulse { animation: statusPulse 2s ease infinite; }
+
+  /* ===== CEFR Level Selector ===== */
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .level-btn {
+    padding: 10px 6px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .dark .level-btn {
+    background: #1e1e1e;
+    border-color: #374151;
+  }
+  .level-btn:hover:not(.active) {
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .dark .level-btn:hover:not(.active) {
+    border-color: #4b5563;
+  }
+  .level-btn.active {
+    border-color: transparent;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .level-btn.active[data-level="beginner"] {
+    background: linear-gradient(135deg, #34D399, #059669);
+    color: white;
+  }
+  .level-btn.active[data-level="intermediate"] {
+    background: linear-gradient(135deg, #60A5FA, #2563EB);
+    color: white;
+  }
+  .level-btn.active[data-level="advanced"] {
+    background: linear-gradient(135deg, #C084FC, #7C3AED);
+    color: white;
+  }
+  .level-emoji { font-size: 22px; line-height: 1; margin-bottom: 4px; }
+  .level-name { font-weight: 700; font-size: 13px; line-height: 1.2; }
+  .level-cefr {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    opacity: 0.8;
+    letter-spacing: 0.04em;
+  }
+  .level-desc {
+    font-size: 10px;
+    margin-top: 3px;
+    opacity: 0.7;
+    line-height: 1.3;
+  }
+  .level-btn:not(.active) .level-name { color: #374151; }
+  .level-btn:not(.active) .level-cefr { color: #6b7280; }
+  .level-btn:not(.active) .level-desc { color: #9ca3af; }
+  .dark .level-btn:not(.active) .level-name { color: #d1d5db; }
+  .dark .level-btn:not(.active) .level-cefr { color: #9ca3af; }
+  .dark .level-btn:not(.active) .level-desc { color: #6b7280; }
+
+  .cefr-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .cefr-badge.beginner { background: rgba(52,211,153,0.15); color: #059669; border: 1px solid rgba(52,211,153,0.4); }
+  .cefr-badge.intermediate { background: rgba(96,165,250,0.15); color: #2563EB; border: 1px solid rgba(96,165,250,0.4); }
+  .cefr-badge.advanced { background: rgba(192,132,252,0.15); color: #7C3AED; border: 1px solid rgba(192,132,252,0.4); }
+  .dark .cefr-badge.beginner { background: rgba(52,211,153,0.1); color: #34D399; border-color: rgba(52,211,153,0.3); }
+  .dark .cefr-badge.intermediate { background: rgba(96,165,250,0.1); color: #60A5FA; border-color: rgba(96,165,250,0.3); }
+  .dark .cefr-badge.advanced { background: rgba(192,132,252,0.1); color: #C084FC; border-color: rgba(192,132,252,0.3); }
+
+  .vocab-label {
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+  .dark .vocab-label { color: #6b7280; }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-[#121212] text-gray-900 dark:text-gray-100 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-gradient-hero shadow-lg">
+  <div class="max-w-3xl mx-auto px-4 py-7 text-center">
+    <div class="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-1.5 mb-3">
+      <span class="w-2 h-2 bg-white rounded-full pulse-dot"></span>
+      <span class="text-xs font-bold tracking-widest uppercase text-white/90" style="font-family:'JetBrains Mono',monospace;">LIVE RSS FEEDS</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-black" style="font-family:'Merriweather',serif; color:#0a1f7a; text-shadow:0 2px 4px rgba(0,0,0,0.1);">
+      &#x1F4E1; ReadPulse &mdash; Learn Real English
+    </h1>
+    <p class="mt-2 text-white/90 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+      Real articles from <strong>BBC News</strong>, <strong>Forbes</strong>, <strong>Scientific American</strong>, <strong>Rolling Stone</strong>, <strong>IGN</strong> &amp; more &mdash; adapted to your English level with vocabulary &amp; discussion questions.
+    </p>
+  </div>
+</header>
+
+<div class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- HOW IT WORKS -->
+  <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md p-4 mb-5 border border-gray-200 dark:border-gray-700 text-sm">
+    <p class="font-bold mb-1 flex items-center gap-2"><span class="text-lg">&#x1F4D6;</span> How It Works</p>
+    <p class="text-gray-500 dark:text-gray-400"><strong>1.</strong> Select your English level below. <strong>2.</strong> Pick a topic or type your own. <strong>3.</strong> Tap <strong>&ldquo;Fetch &amp; Learn&rdquo;</strong>. The app pulls live articles from <strong>RSS feeds</strong>, then adapts vocabulary, summaries, and discussion questions to your CEFR level.</p>
+  </div>
+
+  <!-- CEFR LEVEL SELECTOR -->
+  <div class="mb-5">
+    <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">
+      <i class="fa-solid fa-graduation-cap mr-1"></i> Your English level:
+    </label>
+    <div class="level-grid" id="levelSelector">
+      <button class="level-btn active" data-level="beginner">
+        <div class="level-emoji">&#x1F331;</div>
+        <div class="level-name">Beginner</div>
+        <div class="level-cefr">A1 &ndash; A2</div>
+        <div class="level-desc">Simple words &amp; short sentences</div>
+      </button>
+      <button class="level-btn" data-level="intermediate">
+        <div class="level-emoji">&#x1F4DA;</div>
+        <div class="level-name">Intermediate</div>
+        <div class="level-cefr">B1 &ndash; B2</div>
+        <div class="level-desc">Everyday &amp; work topics</div>
+      </button>
+      <button class="level-btn" data-level="advanced">
+        <div class="level-emoji">&#x1F393;</div>
+        <div class="level-name">Advanced</div>
+        <div class="level-cefr">C1 &ndash; C2</div>
+        <div class="level-desc">Complex ideas &amp; technical terms</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- TOPIC SELECTION -->
+  <div class="mb-4">
+    <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">Choose a topic:</label>
+    <div class="flex gap-2 flex-wrap" id="topicPills"></div>
+  </div>
+
+  <!-- CUSTOM TOPIC -->
+  <div class="mb-4">
+    <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">Or type your own topic:</label>
+    <input
+      type="text"
+      id="customTopic"
+      placeholder="e.g. &quot;climate change&quot; or &quot;video games&quot; or &quot;stock market&quot;"
+      autocomplete="off"
+      class="search-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-gray-100 outline-none transition-all"
+      style="font-size:16px;"
+    >
+  </div>
+
+  <!-- FETCH BUTTON -->
+  <button id="fetchBtn" class="gen-btn w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 mb-6">
+    <i class="fa-solid fa-rss"></i> Fetch &amp; Learn
+  </button>
+
+  <!-- STATUS -->
+  <div id="statusArea" class="hidden mb-5 text-center">
+    <div class="inline-flex items-center gap-3 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2.5 shadow-sm">
+      <div class="w-4 h-4 border-2 border-sky border-t-transparent rounded-full animate-spin"></div>
+      <span id="statusText" class="text-sm font-semibold text-gray-600 dark:text-gray-300 status-pulse">Fetching feeds...</span>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="errorArea" class="hidden error-box rounded-xl p-4 mb-5 text-center">
+    <p class="text-red-600 dark:text-red-400 font-semibold text-sm">
+      <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="errorText"></span>
+    </p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+
+  <!-- FOOTER -->
+  <footer class="mt-10 pt-5 border-t border-gray-200 dark:border-gray-700 text-center pb-8">
+    <p class="text-xs text-gray-400 dark:text-gray-500">
+      &#x1F4DA; Content sourced live from <strong>BBC News</strong>, <strong>TechCrunch</strong>, <strong>Forbes</strong>, <strong>HBR</strong>, <strong>Scientific American</strong>, <strong>National Geographic</strong>, <strong>IGN</strong>, <strong>Rolling Stone</strong>, <strong>Lifehacker</strong> &amp; more via RSS
+    </p>
+    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+      &#x1F4A1; Brought to you by <strong>English Training Hub!</strong> &copy; <span id="year"></span>
+    </p>
+  </footer>
+</div>
+
+<script>
+/* ===== YEAR ===== */
+document.getElementById("year").textContent = new Date().getFullYear();
+
+/* ===== DARK MODE ===== */
+if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  document.documentElement.classList.add("dark");
+}
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
+  if (e.matches) { document.documentElement.classList.add("dark"); }
+  else { document.documentElement.classList.remove("dark"); }
+});
+
+/* ========================================
+   FEED SOURCES
+   ======================================== */
+var FEEDS = [
+  /* 0  */ { name: "BBC News",               feed: "https://feeds.bbci.co.uk/news/rss.xml",             icon: "fa-solid fa-newspaper",       color: "#BB1919" },
+  /* 1  */ { name: "Reuters",                feed: "https://www.reutersagency.com/feed/",               icon: "fa-solid fa-globe",           color: "#FF8000" },
+  /* 2  */ { name: "TechCrunch",             feed: "https://techcrunch.com/feed/",                      icon: "fa-solid fa-rocket",          color: "#00A562" },
+  /* 3  */ { name: "The Verge",              feed: "https://www.theverge.com/rss/index.xml",            icon: "fa-solid fa-bolt",            color: "#6200EA" },
+  /* 4  */ { name: "Forbes",                 feed: "https://www.forbes.com/innovation/feed2",           icon: "fa-solid fa-briefcase",       color: "#182848" },
+  /* 5  */ { name: "Harvard Business Review", feed: "https://feeds.hbr.org/harvardbusiness",            icon: "fa-solid fa-graduation-cap",  color: "#A51C30" },
+  /* 6  */ { name: "Scientific American",    feed: "https://rss.sciam.com/ScientificAmerican-Global",   icon: "fa-solid fa-flask",           color: "#004276" },
+  /* 7  */ { name: "National Geographic",    feed: "https://www.nationalgeographic.com/feed",           icon: "fa-solid fa-earth-americas",  color: "#FFC300" },
+  /* 8  */ { name: "IGN",                    feed: "https://feeds.feedburner.com/ign/all",              icon: "fa-solid fa-gamepad",         color: "#BF1313" },
+  /* 9  */ { name: "Rolling Stone",          feed: "https://www.rollingstone.com/feed/",                icon: "fa-solid fa-music",           color: "#E4002B" },
+  /* 10 */ { name: "Lifehacker",             feed: "https://lifehacker.com/feed/rss",                   icon: "fa-solid fa-lightbulb",       color: "#66BB6A" },
+  /* 11 */ { name: "Apartment Therapy",      feed: "https://www.apartmenttherapy.com/main.rss",         icon: "fa-solid fa-house",           color: "#FF6F61" },
+  /* 12 */ { name: "Ars Technica",           feed: "https://feeds.arstechnica.com/arstechnica/index",   icon: "fa-solid fa-microchip",       color: "#FF4500" },
+  /* 13 */ { name: "Wired",                  feed: "https://www.wired.com/feed/rss",                    icon: "fa-solid fa-wifi",            color: "#00BCD4" },
+  /* 14 */ { name: "Science Daily",          feed: "https://www.sciencedaily.com/rss/all.xml",          icon: "fa-solid fa-microscope",      color: "#2E86AB" },
+  /* 15 */ { name: "Space.com",              feed: "https://www.space.com/feeds/all",                   icon: "fa-solid fa-shuttle-space",   color: "#1565C0" }
+];
+
+var RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+/* ========================================
+   BLOCKED CONTENT — religion & politics
+   ======================================== */
+var BLOCKED_KEYWORDS = [
+  "election","political","politics","politician","democrat","republican",
+  "conservative party","liberal party","parliament","congressman","congresswoman",
+  "senator","legislation","partisan","ballot","caucus","lobby group",
+  "voter fraud","impeach","lawmaker","bipartisan","left-wing","right-wing",
+  "far-right","far-left","fascist","communist","socialist","marxist",
+  "authoritarian","dictatorship","regime change","coup","propaganda",
+  "geopolitical","troops deployed","invasion","ceasefire","annexation",
+  "separatist","insurgent","militia","extremist","presidential race",
+  "presidential candidate","opposition party","political party","white house",
+  " gop ","primary election","midterm","electoral","cabinet reshuffle",
+  "prime minister","head of state",
+  "religion","religious","church service","mosque","synagogue",
+  "bible","quran","koran","torah","christianity","christian faith",
+  "catholic","protestant","evangelical","muslim","islam","islamic",
+  "hinduism","buddhism","judaism","prayer","worship","clergy","priest",
+  "pastor","imam","rabbi","pope","vatican","theology","scripture",
+  "sermon","missionary","baptism","resurrection","salvation","blasphemy",
+  "heresy","creationism","fatwa","sharia"
+];
+
+function isBlockedContent(title, description) {
+  var text = (" " + (title || "") + " " + (description || "") + " ").toLowerCase();
+  for (var i = 0; i < BLOCKED_KEYWORDS.length; i++) {
+    if (text.indexOf(BLOCKED_KEYWORDS[i]) !== -1) return true;
+  }
+  return false;
+}
+
+/* ========================================
+   TOPICS — no politics/religion
+   ======================================== */
+var TOPICS = [
+  {
+    label: "Technology", icon: "\u{1F4BB}",
+    feedIdx: [2, 3, 12, 13],
+    keywords: ["technology", "software", "hardware", "app", "startup", "digital", "internet", "computer", "device", "innovation", "tech", "platform", "gadget"]
+  },
+  {
+    label: "Business & Finance", icon: "\u{1F4BC}",
+    feedIdx: [4, 5, 1, 2],
+    keywords: ["business", "finance", "market", "stock", "investment", "economy", "revenue", "profit", "company", "corporate", "leadership", "management", "strategy", "entrepreneur"]
+  },
+  {
+    label: "Science & Nature", icon: "\u{1F52C}",
+    feedIdx: [6, 7, 14, 13],
+    keywords: ["science", "research", "study", "discovery", "experiment", "biology", "chemistry", "physics", "genetics", "species", "scientist", "nature", "fossil"]
+  },
+  {
+    label: "Space & Cosmos", icon: "\u{1F680}",
+    feedIdx: [15, 14, 6, 7],
+    keywords: ["space", "nasa", "rocket", "orbit", "satellite", "mars", "moon", "astronaut", "telescope", "galaxy", "planet", "cosmic", "launch", "spacex", "star", "asteroid"]
+  },
+  {
+    label: "Gaming", icon: "\u{1F3AE}",
+    feedIdx: [8, 3, 2, 13],
+    keywords: ["game", "gaming", "playstation", "xbox", "nintendo", "steam", "esport", "rpg", "multiplayer", "console", "pc gaming", "review", "trailer", "gamer"]
+  },
+  {
+    label: "Music & Culture", icon: "\u{1F3B5}",
+    feedIdx: [9, 0, 8],
+    keywords: ["music", "album", "concert", "artist", "song", "band", "festival", "film", "movie", "culture", "entertainment", "tour", "release", "pop", "rock", "hip-hop"]
+  },
+  {
+    label: "Lifestyle & Home", icon: "\u{1F3E0}",
+    feedIdx: [10, 11, 4],
+    keywords: ["lifestyle", "home", "decor", "design", "diy", "kitchen", "living", "apartment", "organize", "productivity", "habit", "cooking", "recipe", "interior", "furniture"]
+  },
+  {
+    label: "Health & Wellness", icon: "\u{1F9D8}",
+    feedIdx: [0, 6, 10, 14],
+    keywords: ["health", "wellness", "medical", "fitness", "mental health", "diet", "exercise", "therapy", "disease", "treatment", "vaccine", "nutrition", "sleep", "brain", "doctor"]
+  },
+  {
+    label: "AI & Robotics", icon: "\u{1F916}",
+    feedIdx: [2, 3, 12, 13, 14],
+    keywords: ["artificial intelligence", "machine learning", "robot", "neural network", "chatbot", "language model", " ai ", "automation", "deep learning", "generative", "openai"]
+  },
+  {
+    label: "Environment", icon: "\u{1F331}",
+    feedIdx: [7, 14, 0, 6],
+    keywords: ["climate", "environment", "renewable", "solar", "carbon", "pollution", "ocean", "wildlife", "conservation", "sustainable", "green", "ecosystem", "energy", "warming"]
+  },
+  {
+    label: "Cybersecurity", icon: "\u{1F6E1}\uFE0F",
+    feedIdx: [12, 13, 2, 3],
+    keywords: ["cybersecurity", "security", "hacker", "ransomware", "malware", "encryption", "breach", "vulnerability", "phishing", "cyber", "privacy", "data protection"]
+  }
+];
+
+/* ========================================
+   DISCUSSION QUESTIONS — per topic × level
+   ======================================== */
+var QUESTION_TEMPLATES = {
+  "Technology": {
+    beginner: [
+      "Do you use a computer or phone every day? What do you use it for?",
+      "What is your favorite app or website? Why do you like it?",
+      "Is technology helpful in your life? Give one example."
+    ],
+    intermediate: [
+      "What technology do you use most in your daily life? How has it changed your routine?",
+      "Do you think technology makes life better or more complicated? Give examples.",
+      "What new technology are you most excited about for the future? Why?"
+    ],
+    advanced: [
+      "How has rapid technological innovation reshaped societal structures and interpersonal communication?",
+      "What ethical considerations should guide the development and deployment of emerging technologies?",
+      "Discuss the tension between technological convenience and individual privacy in a connected world."
+    ]
+  },
+  "Business & Finance": {
+    beginner: [
+      "Do you want to work for a big company or a small company? Why?",
+      "What job would you like to have in the future?",
+      "Do you save money? How do you save?"
+    ],
+    intermediate: [
+      "What qualities make a company successful in today\u2019s market?",
+      "Would you prefer working for a large corporation or a startup? Explain your reasoning.",
+      "How has the economy in your country changed in recent years?"
+    ],
+    advanced: [
+      "Evaluate the impact of globalization on local business ecosystems and employment patterns.",
+      "How do leadership styles differ across cultures, and what effect does this have on international business?",
+      "Analyze the relationship between corporate social responsibility and long-term profitability."
+    ]
+  },
+  "Science & Nature": {
+    beginner: [
+      "Do you like science? What is your favorite topic in science?",
+      "What animal or plant do you find interesting? Why?",
+      "Do you watch science shows or read science news?"
+    ],
+    intermediate: [
+      "What recent scientific discovery do you find fascinating? Why?",
+      "Should more money be spent on scientific research? Why or why not?",
+      "How has science changed your understanding of the natural world?"
+    ],
+    advanced: [
+      "Critically assess the role of peer review in maintaining scientific integrity and reproducibility.",
+      "How do interdisciplinary approaches enhance our understanding of complex natural phenomena?",
+      "Discuss the ethical implications of recent advances in genetic research and gene editing."
+    ]
+  },
+  "Space & Cosmos": {
+    beginner: [
+      "Do you like looking at the stars? What do you see in the night sky?",
+      "Would you like to visit the moon? Why or why not?",
+      "What do you know about the planets in our solar system?"
+    ],
+    intermediate: [
+      "Should humans invest more in space exploration? Why or why not?",
+      "Would you travel to space if you had the chance? What would you want to see?",
+      "How does space technology benefit us in everyday life on Earth?"
+    ],
+    advanced: [
+      "Evaluate the scientific and economic justifications for establishing permanent human settlements beyond Earth.",
+      "How has our understanding of the universe evolved with advances in telescope and sensor technology?",
+      "Discuss the implications of private companies leading the next era of space exploration."
+    ]
+  },
+  "Gaming": {
+    beginner: [
+      "Do you play video games? Which games do you like?",
+      "Do you play games on your phone or on a computer?",
+      "Do you think games are fun? Why or why not?"
+    ],
+    intermediate: [
+      "What game genre do you enjoy most, and why?",
+      "Can video games be educational? Give some examples.",
+      "How has the gaming industry changed in the last ten years?"
+    ],
+    advanced: [
+      "How have video games evolved as a storytelling medium compared to traditional narrative forms like film and literature?",
+      "Analyze the sociological impact of online gaming communities on identity formation and social interaction.",
+      "Evaluate the debate around video game monetization models and their long-term effect on player experience."
+    ]
+  },
+  "Music & Culture": {
+    beginner: [
+      "What kind of music do you like? Who is your favorite singer or band?",
+      "Do you listen to music every day? When do you listen?",
+      "Have you been to a concert or a live show? Tell me about it."
+    ],
+    intermediate: [
+      "What kind of music do you enjoy, and how does it affect your mood?",
+      "Do music and films help people understand different cultures? How?",
+      "Who is an artist or musician that has influenced you, and why?"
+    ],
+    advanced: [
+      "How has the digitization of music distribution transformed the relationship between artists and their audiences?",
+      "Analyze the role of cultural exports such as music, film, and art in shaping global perceptions of a country.",
+      "Discuss how streaming platforms have altered the economics and creative processes of the music industry."
+    ]
+  },
+  "Lifestyle & Home": {
+    beginner: [
+      "What do you do in the morning before work or school?",
+      "Do you cook at home? What is your favorite thing to cook?",
+      "What room in your home do you like the most? Why?"
+    ],
+    intermediate: [
+      "What daily habits help you stay productive and organized?",
+      "How important is your living space to your overall well-being?",
+      "What lifestyle change have you made recently that improved your life?"
+    ],
+    advanced: [
+      "How do urban design and living spaces influence productivity, creativity, and mental health?",
+      "Evaluate the growing minimalism movement and its cultural significance in consumer societies.",
+      "Analyze how remote work has fundamentally changed the relationship between domestic and professional spaces."
+    ]
+  },
+  "Health & Wellness": {
+    beginner: [
+      "Do you exercise? What kind of exercise do you do?",
+      "What healthy food do you like to eat?",
+      "How many hours do you sleep every night? Is it enough?"
+    ],
+    intermediate: [
+      "What do you do to maintain your physical and mental health?",
+      "Are modern lifestyles making people less healthy? Why?",
+      "How important is sleep for your productivity and mood?"
+    ],
+    advanced: [
+      "Critically examine how socioeconomic factors influence access to healthcare and wellness resources.",
+      "How has the concept of \u2018wellness\u2019 been commercialized, and what are the implications for public health?",
+      "Discuss the long-term societal effects of the growing mental health awareness movement."
+    ]
+  },
+  "AI & Robotics": {
+    beginner: [
+      "Have you tried using a chatbot or an AI tool? What happened?",
+      "Do you think robots can help people at work or at home? How?",
+      "Are you excited or worried about AI? Why?"
+    ],
+    intermediate: [
+      "How might AI change jobs in your industry in the next few years?",
+      "What are some benefits and risks of increasingly powerful AI systems?",
+      "Do you use any AI tools at work or home? Describe your experience."
+    ],
+    advanced: [
+      "Evaluate the philosophical implications of artificial general intelligence on human identity and purpose.",
+      "How should societies balance the economic efficiency gains from automation against workforce displacement?",
+      "Discuss the challenges of creating fair and transparent frameworks for responsible AI development."
+    ]
+  },
+  "Environment": {
+    beginner: [
+      "Do you recycle at home? What do you recycle?",
+      "What is your favorite place in nature? Describe it.",
+      "Do you think it is important to protect animals and forests? Why?"
+    ],
+    intermediate: [
+      "What environmental issues concern you the most? Why?",
+      "What can people do every day to help protect the environment?",
+      "Can the world switch completely to clean energy? What are the challenges?"
+    ],
+    advanced: [
+      "Analyze the effectiveness of carbon pricing mechanisms in reducing industrial emissions.",
+      "How do developing economies balance economic growth with environmental sustainability?",
+      "Evaluate the role of technological innovation versus behavioral change in addressing climate change."
+    ]
+  },
+  "Cybersecurity": {
+    beginner: [
+      "Do you use passwords for your accounts? Are they strong passwords?",
+      "Have you ever received a strange email or message online? What did you do?",
+      "Do you feel safe when you use the internet? Why or why not?"
+    ],
+    intermediate: [
+      "What do you do to protect your personal information online?",
+      "Why is cybersecurity becoming more important for companies and individuals?",
+      "Have you or someone you know experienced a cyber threat? What happened?"
+    ],
+    advanced: [
+      "Evaluate the trade-offs between organizational security monitoring and personal digital privacy.",
+      "How has the increasing sophistication of social engineering attacks changed security strategies?",
+      "Discuss the implications of quantum computing for current cryptographic standards and data protection."
+    ]
+  }
+};
+
+var GENERIC_QUESTIONS = {
+  beginner: [
+    "What did you know about this topic before reading?",
+    "Is this topic interesting to you? Why or why not?",
+    "What new word did you learn from this article?"
+  ],
+  intermediate: [
+    "What did you already know about this topic before reading?",
+    "How does this topic connect to your life, work, or interests?",
+    "What new vocabulary or ideas did you learn from this article?"
+  ],
+  advanced: [
+    "What prior knowledge did you have about this topic, and how did the article expand or challenge it?",
+    "How does this topic intersect with broader trends in society, technology, or culture?",
+    "Identify and discuss the most significant vocabulary or concepts introduced in this article."
+  ]
+};
+
+/* ========================================
+   STOP WORDS
+   ======================================== */
+var STOP_WORDS = new Set([
+  "the","be","to","of","and","a","in","that","have","i","it","for","not","on",
+  "with","he","as","you","do","at","this","but","his","by","from","they","we",
+  "say","her","she","or","an","will","my","one","all","would","there","their",
+  "what","so","up","out","if","about","who","get","which","go","me","when",
+  "make","can","like","time","no","just","him","know","take","people","into",
+  "year","your","good","some","could","them","see","other","than","then","now",
+  "look","only","come","its","over","think","also","back","after","use","two",
+  "how","our","work","first","well","way","even","new","want","because","any",
+  "these","give","day","most","us","been","were","has","had","are","was","is",
+  "more","may","such","both","each","much","very","used","many","being","made",
+  "between","often","where","while","does","through","own","same","since",
+  "still","those","under","another","found","form","part","based","called",
+  "using","known","including","within","however","during","without","number",
+  "several","large","different","around","long","small","high","every",
+  "before","should","world","among","although","become","possible","began",
+  "against","became","common","example","human","systems","system","general",
+  "major","million","three","united","states","national","process","order",
+  "company","group","level","second","later","last","early","according",
+  "report","reports","researchers","study","university","said",
+  "could","would","should","things","really","years","today","latest",
+  "billion","percent","something","everything","nothing","already",
+  "article","though","whether","related","right","going","might","never",
+  "others","always","house","great","little","place","below","above"
+]);
+
+var selectedIndex = 0;
+var selectedLevel = "beginner";
+var isFetching = false;
+
+/* ========================================
+   CEFR LEVEL CONFIG
+   ======================================== */
+var LEVEL_CONFIG = {
+  beginner: {
+    vocabMinLen: 5,
+    vocabMaxLen: 10,
+    vocabCount: 3,
+    vocabSortAsc: true,
+    vocabLabel: "Key Words",
+    summSentences: 2,
+    summPreferShort: true,
+    summMaxChars: 200,
+    cefrCode: "A1\u2013A2",
+    cefrClass: "beginner"
+  },
+  intermediate: {
+    vocabMinLen: 6,
+    vocabMaxLen: 14,
+    vocabCount: 4,
+    vocabSortAsc: false,
+    vocabLabel: "Key Vocabulary",
+    summSentences: 3,
+    summPreferShort: false,
+    summMaxChars: 350,
+    cefrCode: "B1\u2013B2",
+    cefrClass: "intermediate"
+  },
+  advanced: {
+    vocabMinLen: 7,
+    vocabMaxLen: 99,
+    vocabCount: 6,
+    vocabSortAsc: false,
+    vocabLabel: "Advanced Vocabulary",
+    summSentences: 5,
+    summPreferShort: false,
+    summMaxChars: 500,
+    cefrCode: "C1\u2013C2",
+    cefrClass: "advanced"
+  }
+};
+
+/* ========================================
+   HELPERS
+   ======================================== */
+function esc(str) {
+  var d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+
+function stripHTML(html) {
+  var tmp = document.createElement("div");
+  tmp.innerHTML = html || "";
+  return (tmp.textContent || tmp.innerText || "").trim();
+}
+
+/* Adapt summary to CEFR level */
+function simplifyText(text, level) {
+  var cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.intermediate;
+  var sentences = text.split(/(?<=[.!?])\s+/).filter(function(s) {
+    return s.trim().length > 20;
+  });
+
+  if (sentences.length === 0) {
+    return text.substring(0, cfg.summMaxChars) + "\u2026";
+  }
+
+  var pool, picked;
+
+  if (cfg.summPreferShort) {
+    /* Beginner: pick shortest sentences from first 6 */
+    pool = sentences.slice(0, 6);
+    pool.sort(function(a, b) { return a.length - b.length; });
+    picked = pool.slice(0, cfg.summSentences);
+  } else {
+    /* Intermediate/Advanced: take in order */
+    picked = sentences.slice(0, cfg.summSentences);
+  }
+
+  var result = picked.join(" ").trim();
+  return result || text.substring(0, cfg.summMaxChars) + "\u2026";
+}
+
+/* Extract vocab adapted to CEFR level */
+function extractVocab(text, level) {
+  var cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.intermediate;
+  var words = text.replace(/[^a-zA-Z\s-]/g, " ").split(/\s+/);
+  var seen = {};
+  var vocab = [];
+
+  words.forEach(function(w) {
+    var lower = w.toLowerCase();
+    if (lower.length < cfg.vocabMinLen) return;
+    if (lower.length > cfg.vocabMaxLen) return;
+    if (STOP_WORDS.has(lower)) return;
+    if (seen[lower]) return;
+    seen[lower] = true;
+    vocab.push(lower);
+  });
+
+  if (cfg.vocabSortAsc) {
+    vocab.sort(function(a, b) { return a.length - b.length; });
+  } else {
+    vocab.sort(function(a, b) { return b.length - a.length; });
+  }
+
+  return vocab.slice(0, cfg.vocabCount);
+}
+
+/* Score article relevance */
+function scoreArticle(title, description, keywords) {
+  var text = (" " + title + " " + description + " ").toLowerCase();
+  var score = 0;
+  keywords.forEach(function(kw) {
+    var kwl = kw.toLowerCase();
+    if (kwl.length <= 3) {
+      var regex = new RegExp("\\b" + kwl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
+      var matches = text.match(regex);
+      if (matches) score += matches.length * 2;
+    } else {
+      var idx = 0;
+      while ((idx = text.indexOf(kwl, idx)) !== -1) {
+        score += 1;
+        idx += kwl.length;
+      }
+      if (title.toLowerCase().indexOf(kwl) !== -1) score += 3;
+    }
+  });
+  return score;
+}
+
+/* Format relative date */
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  try {
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    var now = new Date();
+    var diffMs = now - d;
+    var diffHrs = Math.floor(diffMs / 3600000);
+    if (diffHrs < 1) return "Just now";
+    if (diffHrs < 24) return diffHrs + "h ago";
+    var diffDays = Math.floor(diffHrs / 24);
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 30) return diffDays + " days ago";
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch (e) {
+    return "";
+  }
+}
+
+/* ========================================
+   RENDER FUNCTIONS
+   ======================================== */
+function renderTopicPills() {
+  var container = document.getElementById("topicPills");
+  var html = "";
+  TOPICS.forEach(function(t, i) {
+    var cls = i === selectedIndex ? " active" : "";
+    html += '<button class="topic-pill' + cls + ' px-3 py-1.5 rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-[#1e1e1e] text-gray-600 dark:text-gray-300 text-sm font-medium whitespace-nowrap" data-idx="' + i + '">' + t.icon + " " + esc(t.label) + "</button>";
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll(".topic-pill").forEach(function(pill) {
+    pill.addEventListener("click", function() {
+      container.querySelectorAll(".topic-pill").forEach(function(p) { p.classList.remove("active"); });
+      this.classList.add("active");
+      selectedIndex = parseInt(this.dataset.idx, 10);
+      document.getElementById("customTopic").value = "";
+    });
+  });
+}
+
+function renderSkeletons() {
+  var html = "";
+  for (var i = 0; i < 3; i++) {
+    html += '<div class="insight-card rounded-xl p-5 mb-4">';
+    html += '<div class="skeleton h-4 w-28 mb-3"></div>';
+    html += '<div class="skeleton h-5 w-3/4 mb-2"></div>';
+    html += '<div class="skeleton h-3 w-1/3 mb-4"></div>';
+    html += '<div class="flex gap-2 mb-3"><div class="skeleton h-6 w-20 rounded-full"></div><div class="skeleton h-6 w-24 rounded-full"></div><div class="skeleton h-6 w-16 rounded-full"></div></div>';
+    html += '<div class="skeleton h-3 w-full mb-2"></div><div class="skeleton h-3 w-full mb-2"></div><div class="skeleton h-3 w-2/3 mb-4"></div>';
+    html += '<div class="skeleton h-24 w-full rounded-lg"></div>';
+    html += "</div>";
+  }
+  return html;
+}
+
+function renderInsights(articles, topicLabel) {
+  var cfg = LEVEL_CONFIG[selectedLevel] || LEVEL_CONFIG.intermediate;
+
+  /* Get level-specific questions */
+  var topicQ = QUESTION_TEMPLATES[topicLabel];
+  var questions;
+  if (topicQ && topicQ[selectedLevel]) {
+    questions = topicQ[selectedLevel];
+  } else {
+    var gq = GENERIC_QUESTIONS[selectedLevel] || GENERIC_QUESTIONS.intermediate;
+    questions = gq;
+  }
+
+  var html = "";
+
+  articles.forEach(function(article, i) {
+    var color = article.sourceColor || "#1E90FF";
+    var icon = article.sourceIcon || "fa-solid fa-newspaper";
+    var summary = simplifyText(article.description || article.title, selectedLevel);
+    var vocab = extractVocab((article.title + " " + article.description), selectedLevel);
+    var dateStr = formatDate(article.pubDate);
+
+    /* Vocab tags */
+    var vocabHTML = "";
+    if (vocab.length > 0) {
+      vocabHTML = '<div class="vocab-label">' + esc(cfg.vocabLabel) + "</div>";
+      vocabHTML += '<div class="flex flex-wrap gap-2 mb-3">';
+      vocab.forEach(function(v) {
+        vocabHTML += '<span class="vocab-tag text-xs font-semibold px-2.5 py-1 rounded-full">' + esc(v) + "</span>";
+      });
+      vocabHTML += "</div>";
+    }
+
+    /* Thumbnail */
+    var thumbHTML = "";
+    if (article.thumbnail) {
+      thumbHTML = '<img src="' + esc(article.thumbnail) + '" alt="" class="thumb-img w-20 h-20 md:w-24 md:h-24 flex-shrink-0" onerror="this.style.display=\'none\'">';
+    }
+
+    /* Questions */
+    var qHTML = '<div class="discussion-box rounded-lg p-4 mt-4">';
+    qHTML += '<h4 class="font-bold text-sm mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-100"><i class="fa-solid fa-comments" style="color:' + color + '"></i> Discussion Questions</h4>';
+    qHTML += '<ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">';
+    questions.forEach(function(q) {
+      qHTML += '<li class="leading-relaxed">' + esc(q) + "</li>";
+    });
+    qHTML += "</ol></div>";
+
+    html += '<div class="insight-card rounded-xl p-5 mb-4 fade-up" style="--source-color:' + color + "; animation-delay:" + (i * 0.12) + 's">';
+
+    /* Source badge + CEFR badge + Title row */
+    html += '<div class="flex items-start gap-3 mb-3">';
+    html += '<div class="flex-1 min-w-0">';
+    html += '<div class="flex items-center gap-2 mb-1.5 flex-wrap">';
+    html += '<div class="source-badge" style="background:' + color + '15; color:' + color + '; border:1px solid ' + color + '40">';
+    html += '<i class="' + icon + '"></i> ' + esc(article.source);
+    html += "</div>";
+    html += '<div class="cefr-badge ' + cfg.cefrClass + '">';
+    html += '<i class="fa-solid fa-book-open" style="font-size:9px"></i> ' + cfg.cefrCode;
+    html += "</div>";
+    if (dateStr) {
+      html += '<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">' + esc(dateStr) + "</span>";
+    }
+    html += "</div>";
+    html += '<h3 class="text-base md:text-lg font-bold leading-snug text-gray-800 dark:text-gray-100">' + esc(article.title) + "</h3>";
+    html += "</div>";
+    html += thumbHTML;
+    html += "</div>";
+
+    /* Vocab */
+    html += vocabHTML;
+
+    /* Summary */
+    html += '<p class="text-sm md:text-base leading-relaxed text-gray-600 dark:text-gray-400 mb-1">' + esc(summary) + "</p>";
+
+    /* Questions */
+    html += qHTML;
+
+    /* Link */
+    html += '<a href="' + esc(article.link) + '" target="_blank" rel="noopener" class="source-link inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg mt-4 no-underline">';
+    html += '<i class="fa-solid fa-arrow-up-right-from-square"></i> Read Full Article on ' + esc(article.source) + "</a>";
+
+    html += "</div>";
+  });
+
+  document.getElementById("results").innerHTML = html;
+}
+
+/* ========================================
+   UI HELPERS
+   ======================================== */
+function showStatus(text) {
+  document.getElementById("statusArea").classList.remove("hidden");
+  document.getElementById("statusText").textContent = text;
+}
+function hideStatus() {
+  document.getElementById("statusArea").classList.add("hidden");
+}
+function showError(text) {
+  document.getElementById("errorArea").classList.remove("hidden");
+  document.getElementById("errorText").textContent = text;
+  document.getElementById("results").innerHTML = "";
+}
+function hideError() {
+  document.getElementById("errorArea").classList.add("hidden");
+}
+function resetBtn() {
+  isFetching = false;
+  var btn = document.getElementById("fetchBtn");
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-rss"></i> Fetch &amp; Learn';
+}
+
+/* ========================================
+   FETCH SINGLE FEED via rss2json.com
+   ======================================== */
+async function fetchOneFeed(feedSource) {
+  var url = RSS2JSON + encodeURIComponent(feedSource.feed);
+  var resp = await fetch(url);
+  if (!resp.ok) throw new Error("HTTP " + resp.status);
+  var data = await resp.json();
+  if (data.status !== "ok" || !data.items || data.items.length === 0) {
+    throw new Error("No items");
+  }
+  return data.items.map(function(item) {
+    return {
+      title: stripHTML(item.title || ""),
+      link: item.link || "",
+      description: stripHTML(item.description || item.content || ""),
+      pubDate: item.pubDate || "",
+      thumbnail: item.thumbnail || (item.enclosure && item.enclosure.link) || "",
+      source: feedSource.name,
+      sourceIcon: feedSource.icon,
+      sourceColor: feedSource.color
+    };
+  }).filter(function(a) {
+    return a.title.length > 10 && a.description.length > 30;
+  });
+}
+
+/* ========================================
+   MAIN FETCH & FILTER LOGIC
+   ======================================== */
+async function doFetch() {
+  if (isFetching) return;
+  isFetching = true;
+
+  var btn = document.getElementById("fetchBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<div class="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div> Fetching\u2026';
+
+  hideError();
+  document.getElementById("results").innerHTML = renderSkeletons();
+
+  /* Determine topic, keywords, and feeds to query */
+  var custom = document.getElementById("customTopic").value.trim();
+  var topicLabel, keywords, feedIndices;
+
+  if (custom) {
+    topicLabel = custom;
+    keywords = custom.toLowerCase().split(/\s+/).filter(function(w) { return w.length > 1; });
+    if (keywords.length > 1) keywords.unshift(custom.toLowerCase());
+    feedIndices = FEEDS.map(function(_, i) { return i; });
+  } else if (selectedIndex >= 0 && selectedIndex < TOPICS.length) {
+    var topic = TOPICS[selectedIndex];
+    topicLabel = topic.label;
+    keywords = topic.keywords;
+    feedIndices = topic.feedIdx;
+  } else {
+    topicLabel = "General";
+    keywords = ["technology", "science", "health"];
+    feedIndices = [0, 2, 6, 10, 14];
+  }
+
+  showStatus("Fetching RSS feeds from " + feedIndices.length + " sources\u2026");
+
+  /* Fetch all selected feeds in parallel */
+  var feedPromises = feedIndices.map(function(idx) {
+    return fetchOneFeed(FEEDS[idx]).catch(function() { return []; });
+  });
+
+  try {
+    var feedResults = await Promise.all(feedPromises);
+
+    showStatus("Filtering articles\u2026");
+    await new Promise(function(r) { setTimeout(r, 200); });
+
+    /* Combine all articles, excluding blocked content */
+    var allArticles = [];
+    feedResults.forEach(function(items) {
+      items.forEach(function(item) {
+        if (!isBlockedContent(item.title, item.description)) {
+          allArticles.push(item);
+        }
+      });
+    });
+
+    if (allArticles.length === 0) {
+      throw new Error("Could not load articles from any feed. Please try again later.");
+    }
+
+    /* Score each article */
+    allArticles.forEach(function(a) {
+      a._score = scoreArticle(a.title, a.description, keywords);
+    });
+
+    /* Sort by relevance then date */
+    allArticles.sort(function(a, b) {
+      if (b._score !== a._score) return b._score - a._score;
+      return new Date(b.pubDate || 0) - new Date(a.pubDate || 0);
+    });
+
+    /* Pick top articles, preferring source diversity */
+    var picked = [];
+    var usedSources = {};
+    var usedTitles = {};
+
+    for (var i = 0; i < allArticles.length && picked.length < 3; i++) {
+      var art = allArticles[i];
+      var titleKey = art.title.toLowerCase().substring(0, 50);
+      if (usedSources[art.source] || usedTitles[titleKey]) continue;
+      if (art._score > 0 || !custom) {
+        picked.push(art);
+        usedSources[art.source] = true;
+        usedTitles[titleKey] = true;
+      }
+    }
+
+    if (picked.length < 3) {
+      for (var j = 0; j < allArticles.length && picked.length < 3; j++) {
+        var art2 = allArticles[j];
+        var titleKey2 = art2.title.toLowerCase().substring(0, 50);
+        if (usedTitles[titleKey2]) continue;
+        picked.push(art2);
+        usedTitles[titleKey2] = true;
+      }
+    }
+
+    if (picked.length === 0) {
+      throw new Error("No matching articles found for \u201C" + topicLabel + "\u201D. Try a different topic or check back later.");
+    }
+
+    hideStatus();
+    renderInsights(picked, topicLabel);
+
+  } catch (err) {
+    hideStatus();
+    showError(err.message || "Something went wrong. Please try again.");
+  }
+
+  resetBtn();
+}
+
+/* ========================================
+   EVENT LISTENERS
+   ======================================== */
+document.getElementById("fetchBtn").addEventListener("click", doFetch);
+
+document.getElementById("customTopic").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") doFetch();
+});
+
+document.getElementById("customTopic").addEventListener("input", function() {
+  if (this.value.trim()) {
+    document.querySelectorAll(".topic-pill").forEach(function(p) { p.classList.remove("active"); });
+    selectedIndex = -1;
+  } else {
+    var first = document.querySelector(".topic-pill");
+    if (first) {
+      first.classList.add("active");
+      selectedIndex = 0;
+    }
+  }
+});
+
+/* Level selector */
+document.getElementById("levelSelector").querySelectorAll(".level-btn").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.getElementById("levelSelector").querySelectorAll(".level-btn").forEach(function(b) {
+      b.classList.remove("active");
+    });
+    this.classList.add("active");
+    selectedLevel = this.dataset.level;
+  });
+});
+
+/* ===== INIT ===== */
+renderTopicPills();
+</script>
+</body>
+</html>
