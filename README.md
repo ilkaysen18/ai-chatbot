@@ -41,5 +41,3 @@ __**Note:**__ No AI, just direct website feeds:
 [LiveEnglish - CEFR Levels Version](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish4)
 * _**Part 4:**_ Includes a filter for different CEFR levels. And exludes content on religion and politics.
 
-[LiveEnglish - CEFR Levels Version 2](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish4.2)
-
