@@ -28,8 +28,8 @@ A modern AI chatbot interface powered by Wikipedia.
 [LiveEnglish - Wikipedia Version](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish)
 ## Part 2:
 [LiveEnglish - RSS Feeds Version](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish2)
-__**Note:**__
-No AI, just direct website feeds:
+
+__**Note:**__ No AI, just direct website feeds:
 * _**Part 2:**_ Using RSS feeds from Interesting Engineering, Science Daily, Ars Technica, Phys.org, The Verge, and others.
 * _**Part 2:**_ Fetches through the rss2json.com API (a CORS-enabled RSS-to-JSON converter).
 * _**Part 1 & 2:**_ Vocabulary extraction and discussion questions are handled client-side.
