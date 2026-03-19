@@ -1,5 +1,5 @@
 
-# TaskWizard
+# TaskWizard Project
 
 A modern AI chatbot interface powered by Wikipedia. 
 
@@ -22,7 +22,7 @@ A modern AI chatbot interface powered by Wikipedia.
 
 ---------------------------------------------------------------
 
-# AI PROJECT 
+# LiveEnglish PROJECT 
 
 ## Part 1:
 [LiveEnglish - Wikipedia Version](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish)
