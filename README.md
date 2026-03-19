@@ -37,7 +37,7 @@ No AI, just direct website feeds:
 
 ## Part 3:
 
-[LiveEnglish - RSS Feeds Version](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish3)
+[LiveEnglish - More Topics](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish3)
 
 * _**Part 3:**_ Includes a wider range of topics - not just Industry & Tech.
 
