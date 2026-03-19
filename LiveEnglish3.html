@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReadPulse &mdash; Learn Real English</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          navy: '#0a1f7a',
+          gold: '#F9D423',
+          sky: '#1E90FF',
+        }
+      }
+    }
+  };
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body { font-family: 'Source Sans 3', sans-serif; }
+
+  .bg-gradient-hero {
+    background: linear-gradient(135deg, #F9D423 0%, #1E90FF 100%);
+  }
+
+  .insight-card {
+    transition: all 0.3s ease;
+    background: #fffdf5;
+    border: 2px solid transparent;
+    background-image: linear-gradient(#fffdf5, #fffdf5), linear-gradient(135deg, #F9D423, #1E90FF);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--source-color, #1E90FF);
+  }
+  .insight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 144, 255, 0.15);
+  }
+  .dark .insight-card {
+    background: #1e1e1e;
+    background-image: linear-gradient(#1e1e1e, #1e1e1e), linear-gradient(135deg, #F9D423, #1E90FF);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .discussion-box {
+    background: linear-gradient(135deg, rgba(249,212,35,0.08), rgba(30,144,255,0.08));
+    border-left: 4px solid #1E90FF;
+  }
+  .dark .discussion-box {
+    background: linear-gradient(135deg, rgba(249,212,35,0.06), rgba(30,144,255,0.06));
+    border-left: 4px solid #F9D423;
+  }
+
+  .vocab-tag {
+    background: rgba(249,212,35,0.15);
+    color: #0a1f7a;
+    border: 1px solid rgba(249,212,35,0.4);
+  }
+  .dark .vocab-tag {
+    background: rgba(249,212,35,0.1);
+    color: #F9D423;
+    border: 1px solid rgba(249,212,35,0.3);
+  }
+
+  .gen-btn {
+    background: linear-gradient(135deg, #F9D423, #1E90FF);
+    color: #0a1f7a;
+    transition: all 0.25s ease;
+  }
+  .gen-btn:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(30, 144, 255, 0.35);
+    transform: translateY(-1px);
+  }
+  .gen-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+  .topic-pill { transition: all 0.2s ease; cursor: pointer; }
+  .topic-pill.active {
+    background: linear-gradient(135deg, #F9D423, #1E90FF);
+    color: #0a1f7a;
+    font-weight: 700;
+    border-color: transparent;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+  .dark .skeleton {
+    background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.5s ease both; }
+
+  .search-input:focus {
+    border-color: #1E90FF;
+    box-shadow: 0 0 0 3px rgba(30,144,255,0.2);
+  }
+  .dark .search-input:focus {
+    border-color: #F9D423;
+    box-shadow: 0 0 0 3px rgba(249,212,35,0.15);
+  }
+
+  .pulse-dot { animation: pulseDot 2s ease infinite; }
+  @keyframes pulseDot {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(30,144,255,0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(30,144,255,0); }
+  }
+
+  .error-box {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .dark .error-box { background: rgba(239,68,68,0.1); }
+
+  .source-link {
+    background: linear-gradient(135deg, #F9D423, #1E90FF);
+    color: #0a1f7a;
+    transition: all 0.2s ease;
+  }
+  .source-link:hover {
+    box-shadow: 0 4px 12px rgba(30,144,255,0.3);
+    transform: translateY(-1px);
+  }
+
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .thumb-img {
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid rgba(249,212,35,0.3);
+  }
+
+  @keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .status-pulse { animation: statusPulse 2s ease infinite; }
+
+  .category-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 6px;
+  }
+  .dark .category-label { color: #666; }
+</style>
+</head>
+<body class="bg-gray-50 dark:bg-[#121212] text-gray-900 dark:text-gray-100 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-gradient-hero shadow-lg">
+  <div class="max-w-3xl mx-auto px-4 py-7 text-center">
+    <div class="inline-flex items-center gap-2 bg-white/20 rounded-full px-4 py-1.5 mb-3">
+      <span class="w-2 h-2 bg-white rounded-full pulse-dot"></span>
+      <span class="text-xs font-bold tracking-widest uppercase text-white/90" style="font-family:'JetBrains Mono',monospace;">LIVE RSS FEEDS</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-black" style="font-family:'Merriweather',serif; color:#0a1f7a; text-shadow:0 2px 4px rgba(0,0,0,0.1);">
+      &#x1F4E1; ReadPulse &mdash; Learn Real English
+    </h1>
+    <p class="mt-2 text-white/90 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+      Real articles from <strong>BBC News</strong>, <strong>Forbes</strong>, <strong>Scientific American</strong>, <strong>Rolling Stone</strong>, <strong>IGN</strong> &amp; more &mdash; with key vocabulary &amp; discussion questions for ESL learners.
+    </p>
+  </div>
+</header>
+
+<div class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- HOW IT WORKS -->
+  <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md p-4 mb-5 border border-gray-200 dark:border-gray-700 text-sm">
+    <p class="font-bold mb-1 flex items-center gap-2"><span class="text-lg">&#x1F4D6;</span> How It Works</p>
+    <p class="text-gray-500 dark:text-gray-400">Pick any topic or type your own, then tap <strong>&ldquo;Fetch &amp; Learn&rdquo;</strong>. The app pulls live articles from <strong>RSS feeds</strong> of major publications across news, tech, business, science, entertainment &amp; lifestyle &mdash; highlights key vocabulary, and gives you discussion questions to practice speaking.</p>
+  </div>
+
+  <!-- TOPIC SELECTION -->
+  <div class="mb-4">
+    <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">Choose a topic:</label>
+    <div class="flex gap-2 flex-wrap" id="topicPills"></div>
+  </div>
+
+  <!-- CUSTOM TOPIC -->
+  <div class="mb-4">
+    <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">Or type your own topic:</label>
+    <input
+      type="text"
+      id="customTopic"
+      placeholder="e.g. &quot;climate change&quot; or &quot;video games&quot; or &quot;stock market&quot;"
+      autocomplete="off"
+      class="search-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-[#1e1e1e] text-gray-900 dark:text-gray-100 outline-none transition-all"
+      style="font-size:16px;"
+    >
+  </div>
+
+  <!-- FETCH BUTTON -->
+  <button id="fetchBtn" class="gen-btn w-full py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2 mb-6">
+    <i class="fa-solid fa-rss"></i> Fetch &amp; Learn
+  </button>
+
+  <!-- STATUS -->
+  <div id="statusArea" class="hidden mb-5 text-center">
+    <div class="inline-flex items-center gap-3 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2.5 shadow-sm">
+      <div class="w-4 h-4 border-2 border-sky border-t-transparent rounded-full animate-spin"></div>
+      <span id="statusText" class="text-sm font-semibold text-gray-600 dark:text-gray-300 status-pulse">Fetching feeds...</span>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="errorArea" class="hidden error-box rounded-xl p-4 mb-5 text-center">
+    <p class="text-red-600 dark:text-red-400 font-semibold text-sm">
+      <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="errorText"></span>
+    </p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results"></div>
+
+  <!-- FOOTER -->
+  <footer class="mt-10 pt-5 border-t border-gray-200 dark:border-gray-700 text-center pb-8">
+    <p class="text-xs text-gray-400 dark:text-gray-500">
+      &#x1F4DA; Content sourced live from <strong>BBC News</strong>, <strong>TechCrunch</strong>, <strong>Forbes</strong>, <strong>HBR</strong>, <strong>Scientific American</strong>, <strong>National Geographic</strong>, <strong>IGN</strong>, <strong>Rolling Stone</strong>, <strong>Lifehacker</strong> &amp; more via RSS
+    </p>
+    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+      &#x1F4A1; Brought to you by <strong>English Training Hub!</strong> &copy; <span id="year"></span>
+    </p>
+  </footer>
+</div>
+
+<script>
+/* ===== YEAR ===== */
+document.getElementById("year").textContent = new Date().getFullYear();
+
+/* ===== DARK MODE ===== */
+if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+  document.documentElement.classList.add("dark");
+}
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
+  if (e.matches) { document.documentElement.classList.add("dark"); }
+  else { document.documentElement.classList.remove("dark"); }
+});
+
+/* ========================================
+   FEED SOURCES — real RSS feeds
+   Covers: News, Tech, Business, Science,
+   Entertainment, Lifestyle + extras
+   ======================================== */
+var FEEDS = [
+  /* 0  - News */
+  { name: "BBC News",               feed: "https://feeds.bbci.co.uk/news/rss.xml",                  icon: "fa-solid fa-newspaper",       color: "#BB1919" },
+  /* 1  - News */
+  { name: "Reuters",                feed: "https://www.reutersagency.com/feed/",                    icon: "fa-solid fa-globe",           color: "#FF8000" },
+  /* 2  - Tech */
+  { name: "TechCrunch",             feed: "https://techcrunch.com/feed/",                           icon: "fa-solid fa-rocket",          color: "#00A562" },
+  /* 3  - Tech */
+  { name: "The Verge",              feed: "https://www.theverge.com/rss/index.xml",                 icon: "fa-solid fa-bolt",            color: "#6200EA" },
+  /* 4  - Business */
+  { name: "Forbes",                 feed: "https://www.forbes.com/innovation/feed2",                icon: "fa-solid fa-briefcase",       color: "#182848" },
+  /* 5  - Business */
+  { name: "Harvard Business Review", feed: "https://feeds.hbr.org/harvardbusiness",                 icon: "fa-solid fa-graduation-cap",  color: "#A51C30" },
+  /* 6  - Science */
+  { name: "Scientific American",    feed: "https://rss.sciam.com/ScientificAmerican-Global",        icon: "fa-solid fa-flask",           color: "#004276" },
+  /* 7  - Science */
+  { name: "National Geographic",    feed: "https://www.nationalgeographic.com/feed",                icon: "fa-solid fa-earth-americas",  color: "#FFC300" },
+  /* 8  - Entertainment */
+  { name: "IGN",                    feed: "https://feeds.feedburner.com/ign/all",                   icon: "fa-solid fa-gamepad",         color: "#BF1313" },
+  /* 9  - Entertainment */
+  { name: "Rolling Stone",          feed: "https://www.rollingstone.com/feed/",                     icon: "fa-solid fa-music",           color: "#E4002B" },
+  /* 10 - Lifestyle */
+  { name: "Lifehacker",             feed: "https://lifehacker.com/feed/rss",                        icon: "fa-solid fa-lightbulb",       color: "#66BB6A" },
+  /* 11 - Lifestyle */
+  { name: "Apartment Therapy",      feed: "https://www.apartmenttherapy.com/main.rss",              icon: "fa-solid fa-house",           color: "#FF6F61" },
+  /* 12 - Tech (extra) */
+  { name: "Ars Technica",           feed: "https://feeds.arstechnica.com/arstechnica/index",        icon: "fa-solid fa-microchip",       color: "#FF4500" },
+  /* 13 - Tech (extra) */
+  { name: "Wired",                  feed: "https://www.wired.com/feed/rss",                         icon: "fa-solid fa-wifi",            color: "#00BCD4" },
+  /* 14 - Science (extra) */
+  { name: "Science Daily",          feed: "https://www.sciencedaily.com/rss/all.xml",               icon: "fa-solid fa-microscope",      color: "#2E86AB" },
+  /* 15 - Science (extra) */
+  { name: "Space.com",              feed: "https://www.space.com/feeds/all",                        icon: "fa-solid fa-shuttle-space",   color: "#1565C0" }
+];
+
+var RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+/* ========================================
+   TOPIC CONFIG — keywords + feed indices
+   12 diverse topics across all categories
+   ======================================== */
+var TOPICS = [
+  {
+    label: "World News", icon: "\u{1F30D}",
+    feedIdx: [0, 1, 4],
+    keywords: ["world", "global", "international", "government", "election", "war", "peace", "crisis", "summit", "diplomacy", "minister", "president", "policy", "country", "nation"]
+  },
+  {
+    label: "Technology", icon: "\u{1F4BB}",
+    feedIdx: [2, 3, 12, 13],
+    keywords: ["technology", "software", "hardware", "app", "startup", "digital", "internet", "computer", "device", "innovation", "tech", "platform", "gadget"]
+  },
+  {
+    label: "Business & Finance", icon: "\u{1F4BC}",
+    feedIdx: [4, 5, 1, 2],
+    keywords: ["business", "finance", "market", "stock", "investment", "economy", "revenue", "profit", "company", "corporate", "leadership", "management", "strategy", "entrepreneur"]
+  },
+  {
+    label: "Science & Nature", icon: "\u{1F52C}",
+    feedIdx: [6, 7, 14, 13],
+    keywords: ["science", "research", "study", "discovery", "experiment", "biology", "chemistry", "physics", "genetics", "evolution", "species", "scientist", "nature", "fossil"]
+  },
+  {
+    label: "Space & Cosmos", icon: "\u{1F680}",
+    feedIdx: [15, 14, 6, 7],
+    keywords: ["space", "nasa", "rocket", "orbit", "satellite", "mars", "moon", "astronaut", "telescope", "galaxy", "planet", "cosmic", "launch", "spacex", "star", "asteroid"]
+  },
+  {
+    label: "Gaming", icon: "\u{1F3AE}",
+    feedIdx: [8, 3, 2, 13],
+    keywords: ["game", "gaming", "playstation", "xbox", "nintendo", "steam", "esport", "rpg", "multiplayer", "console", "pc gaming", "review", "trailer", "gamer"]
+  },
+  {
+    label: "Music & Culture", icon: "\u{1F3B5}",
+    feedIdx: [9, 0, 8],
+    keywords: ["music", "album", "concert", "artist", "song", "band", "festival", "film", "movie", "celebrity", "culture", "entertainment", "tour", "release", "pop", "rock", "hip-hop"]
+  },
+  {
+    label: "Lifestyle & Home", icon: "\u{1F3E0}",
+    feedIdx: [10, 11, 4],
+    keywords: ["lifestyle", "home", "decor", "design", "diy", "kitchen", "living", "apartment", "organize", "productivity", "habit", "cooking", "recipe", "interior", "furniture"]
+  },
+  {
+    label: "Health & Wellness", icon: "\u{1F9D8}",
+    feedIdx: [0, 6, 10, 14],
+    keywords: ["health", "wellness", "medical", "fitness", "mental health", "diet", "exercise", "therapy", "disease", "treatment", "vaccine", "nutrition", "sleep", "brain", "doctor"]
+  },
+  {
+    label: "AI & Robotics", icon: "\u{1F916}",
+    feedIdx: [2, 3, 12, 13, 14],
+    keywords: ["artificial intelligence", "machine learning", "robot", "neural network", "chatbot", "language model", " ai ", "automation", "deep learning", "generative", "openai"]
+  },
+  {
+    label: "Environment", icon: "\u{1F331}",
+    feedIdx: [7, 14, 0, 6],
+    keywords: ["climate", "environment", "renewable", "solar", "carbon", "pollution", "ocean", "wildlife", "conservation", "sustainable", "green", "ecosystem", "energy", "warming"]
+  },
+  {
+    label: "Cybersecurity", icon: "\u{1F6E1}\uFE0F",
+    feedIdx: [12, 13, 2, 3],
+    keywords: ["cybersecurity", "security", "hacker", "ransomware", "malware", "encryption", "breach", "vulnerability", "phishing", "cyber", "privacy", "data protection"]
+  }
+];
+
+/* ========================================
+   Discussion question templates per topic
+   ======================================== */
+var QUESTION_TEMPLATES = {
+  "World News": [
+    "What international news stories have you followed recently? Why were they important to you?",
+    "How do world events affect your daily life or your country\u2019s economy?",
+    "Do you think social media has changed the way we consume news? In what ways?"
+  ],
+  "Technology": [
+    "What technology do you use most in your daily life? How has it changed your routine?",
+    "Do you think technology makes our lives better or more complicated? Give examples.",
+    "What new technology are you most excited about for the future? Why?"
+  ],
+  "Business & Finance": [
+    "What makes a company successful in today\u2019s global market?",
+    "Would you prefer to work for a large corporation or a small startup? Explain your reasoning.",
+    "How has the economy in your country changed in recent years?"
+  ],
+  "Science & Nature": [
+    "What recent scientific discovery do you find most fascinating? Why?",
+    "Do you think governments should spend more money on scientific research?",
+    "How has science changed your understanding of the natural world?"
+  ],
+  "Space & Cosmos": [
+    "Do you think humans should invest more in space exploration? Why or why not?",
+    "Would you travel to space if you had the chance? What would you want to see?",
+    "How does space technology benefit us here on Earth?"
+  ],
+  "Gaming": [
+    "Do you play video games? What genre do you enjoy most and why?",
+    "Do you think gaming can be educational? Give some examples.",
+    "How has the gaming industry changed in the last decade?"
+  ],
+  "Music & Culture": [
+    "What kind of music do you enjoy? How does it make you feel?",
+    "Do you think music and films help people learn about different cultures?",
+    "Who is an artist or musician that has influenced you, and why?"
+  ],
+  "Lifestyle & Home": [
+    "What daily habits help you stay productive and organized?",
+    "How important is your living space to your overall well-being?",
+    "What lifestyle change have you made recently that improved your life?"
+  ],
+  "Health & Wellness": [
+    "What do you do to maintain your physical and mental health?",
+    "Do you think modern lifestyles are making people less healthy? Why?",
+    "How important is sleep for your productivity and mood?"
+  ],
+  "AI & Robotics": [
+    "How do you think artificial intelligence will change jobs in your industry?",
+    "What are some benefits and risks of AI becoming more powerful?",
+    "Do you use any AI tools in your daily life or work? Describe your experience."
+  ],
+  "Environment": [
+    "What environmental issues concern you the most? Why?",
+    "What can individuals do to help protect the environment in everyday life?",
+    "Do you think the world can fully switch to clean energy? What are the obstacles?"
+  ],
+  "Cybersecurity": [
+    "What do you do to protect your personal information online?",
+    "Why is cybersecurity becoming more important for companies and governments?",
+    "Have you or someone you know ever experienced a cyber threat? What happened?"
+  ]
+};
+
+var GENERIC_QUESTIONS = [
+  "What did you already know about this topic before reading?",
+  "How does this topic connect to your life, work, or interests?",
+  "What new vocabulary or ideas did you learn from this article?"
+];
+
+/* Common English stop words to exclude from vocab */
+var STOP_WORDS = new Set([
+  "the","be","to","of","and","a","in","that","have","i","it","for","not","on",
+  "with","he","as","you","do","at","this","but","his","by","from","they","we",
+  "say","her","she","or","an","will","my","one","all","would","there","their",
+  "what","so","up","out","if","about","who","get","which","go","me","when",
+  "make","can","like","time","no","just","him","know","take","people","into",
+  "year","your","good","some","could","them","see","other","than","then","now",
+  "look","only","come","its","over","think","also","back","after","use","two",
+  "how","our","work","first","well","way","even","new","want","because","any",
+  "these","give","day","most","us","been","were","has","had","are","was","is",
+  "more","may","such","both","each","much","very","used","many","being","made",
+  "between","often","where","while","does","through","own","same","since",
+  "still","those","under","another","found","form","part","based","called",
+  "using","known","including","within","however","during","without","number",
+  "several","large","different","around","long","small","high","every",
+  "before","should","world","among","although","become","possible","began",
+  "against","became","common","example","human","systems","system","general",
+  "major","million","three","united","states","national","process","order",
+  "company","group","level","second","later","last","early","according",
+  "report","reports","researchers","study","according","university","said",
+  "could","would","should","things","really","years","today","latest",
+  "billion","million","percent","something","everything","nothing","already",
+  "article","though","whether","related","right","going","might","never",
+  "others","always","house","great","little","place","years","below","above"
+]);
+
+var selectedIndex = 0;
+var isFetching = false;
+
+/* ========================================
+   HELPERS
+   ======================================== */
+function esc(str) {
+  var d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+
+function stripHTML(html) {
+  var tmp = document.createElement("div");
+  tmp.innerHTML = html || "";
+  return (tmp.textContent || tmp.innerText || "").trim();
+}
+
+function simplifyText(text, maxSentences) {
+  var n = maxSentences || 3;
+  var sentences = text.split(/(?<=[.!?])\s+/);
+  var result = "";
+  var count = 0;
+  for (var i = 0; i < sentences.length && count < n; i++) {
+    var s = sentences[i].trim();
+    if (s.length > 20) {
+      result += s + " ";
+      count++;
+    }
+  }
+  return result.trim() || text.substring(0, 350) + "\u2026";
+}
+
+/* Extract technical vocab from text */
+function extractVocab(text, maxCount) {
+  var words = text.replace(/[^a-zA-Z\s-]/g, " ").split(/\s+/);
+  var seen = {};
+  var vocab = [];
+
+  words.forEach(function(w) {
+    var lower = w.toLowerCase();
+    if (lower.length < 6) return;
+    if (STOP_WORDS.has(lower)) return;
+    if (seen[lower]) return;
+    seen[lower] = true;
+    vocab.push(lower);
+  });
+
+  vocab.sort(function(a, b) { return b.length - a.length; });
+  return vocab.slice(0, maxCount || 4);
+}
+
+/* Score how relevant an article is to keywords */
+function scoreArticle(title, description, keywords) {
+  var text = (" " + title + " " + description + " ").toLowerCase();
+  var score = 0;
+  keywords.forEach(function(kw) {
+    var kwl = kw.toLowerCase();
+    if (kwl.length <= 3) {
+      var regex = new RegExp("\\b" + kwl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "gi");
+      var matches = text.match(regex);
+      if (matches) score += matches.length * 2;
+    } else {
+      var idx = 0;
+      while ((idx = text.indexOf(kwl, idx)) !== -1) {
+        score += 1;
+        idx += kwl.length;
+      }
+      if (title.toLowerCase().indexOf(kwl) !== -1) score += 3;
+    }
+  });
+  return score;
+}
+
+/* Format relative date */
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  try {
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "";
+    var now = new Date();
+    var diffMs = now - d;
+    var diffHrs = Math.floor(diffMs / 3600000);
+    if (diffHrs < 1) return "Just now";
+    if (diffHrs < 24) return diffHrs + "h ago";
+    var diffDays = Math.floor(diffHrs / 24);
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 30) return diffDays + " days ago";
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch (e) {
+    return "";
+  }
+}
+
+/* ========================================
+   RENDER FUNCTIONS
+   ======================================== */
+function renderTopicPills() {
+  var container = document.getElementById("topicPills");
+  var html = "";
+  TOPICS.forEach(function(t, i) {
+    var cls = i === selectedIndex ? " active" : "";
+    html += '<button class="topic-pill' + cls + ' px-3 py-1.5 rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-[#1e1e1e] text-gray-600 dark:text-gray-300 text-sm font-medium whitespace-nowrap" data-idx="' + i + '">' + t.icon + " " + esc(t.label) + "</button>";
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll(".topic-pill").forEach(function(pill) {
+    pill.addEventListener("click", function() {
+      container.querySelectorAll(".topic-pill").forEach(function(p) { p.classList.remove("active"); });
+      this.classList.add("active");
+      selectedIndex = parseInt(this.dataset.idx, 10);
+      document.getElementById("customTopic").value = "";
+    });
+  });
+}
+
+function renderSkeletons() {
+  var html = "";
+  for (var i = 0; i < 3; i++) {
+    html += '<div class="insight-card rounded-xl p-5 mb-4">';
+    html += '<div class="skeleton h-4 w-28 mb-3"></div>';
+    html += '<div class="skeleton h-5 w-3/4 mb-2"></div>';
+    html += '<div class="skeleton h-3 w-1/3 mb-4"></div>';
+    html += '<div class="flex gap-2 mb-3"><div class="skeleton h-6 w-20 rounded-full"></div><div class="skeleton h-6 w-24 rounded-full"></div><div class="skeleton h-6 w-16 rounded-full"></div></div>';
+    html += '<div class="skeleton h-3 w-full mb-2"></div><div class="skeleton h-3 w-full mb-2"></div><div class="skeleton h-3 w-2/3 mb-4"></div>';
+    html += '<div class="skeleton h-24 w-full rounded-lg"></div>';
+    html += "</div>";
+  }
+  return html;
+}
+
+function renderInsights(articles, topicLabel) {
+  var questions = QUESTION_TEMPLATES[topicLabel] || GENERIC_QUESTIONS;
+  var html = "";
+
+  articles.forEach(function(article, i) {
+    var color = article.sourceColor || "#1E90FF";
+    var icon = article.sourceIcon || "fa-solid fa-newspaper";
+    var summary = simplifyText(article.description || article.title, 3);
+    var vocab = extractVocab((article.title + " " + article.description), 4);
+    var dateStr = formatDate(article.pubDate);
+
+    /* Vocab tags */
+    var vocabHTML = "";
+    if (vocab.length > 0) {
+      vocabHTML = '<div class="flex flex-wrap gap-2 mb-3">';
+      vocab.forEach(function(v) {
+        vocabHTML += '<span class="vocab-tag text-xs font-semibold px-2.5 py-1 rounded-full">' + esc(v) + "</span>";
+      });
+      vocabHTML += "</div>";
+    }
+
+    /* Thumbnail */
+    var thumbHTML = "";
+    if (article.thumbnail) {
+      thumbHTML = '<img src="' + esc(article.thumbnail) + '" alt="" class="thumb-img w-20 h-20 md:w-24 md:h-24 flex-shrink-0" onerror="this.style.display=\'none\'">';
+    }
+
+    /* Questions */
+    var qHTML = '<div class="discussion-box rounded-lg p-4 mt-4">';
+    qHTML += '<h4 class="font-bold text-sm mb-2 flex items-center gap-2 text-gray-800 dark:text-gray-100"><i class="fa-solid fa-comments" style="color:' + color + '"></i> Discussion Questions</h4>';
+    qHTML += '<ol class="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">';
+    questions.forEach(function(q) {
+      qHTML += '<li class="leading-relaxed">' + esc(q) + "</li>";
+    });
+    qHTML += "</ol></div>";
+
+    html += '<div class="insight-card rounded-xl p-5 mb-4 fade-up" style="--source-color:' + color + "; animation-delay:" + (i * 0.12) + 's">';
+
+    /* Source badge + Title row */
+    html += '<div class="flex items-start gap-3 mb-3">';
+    html += '<div class="flex-1 min-w-0">';
+    html += '<div class="flex items-center gap-2 mb-1.5 flex-wrap">';
+    html += '<div class="source-badge" style="background:' + color + '15; color:' + color + '; border:1px solid ' + color + '40">';
+    html += '<i class="' + icon + '"></i> ' + esc(article.source);
+    html += "</div>";
+    if (dateStr) {
+      html += '<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">' + esc(dateStr) + "</span>";
+    }
+    html += "</div>";
+    html += '<h3 class="text-base md:text-lg font-bold leading-snug text-gray-800 dark:text-gray-100">' + esc(article.title) + "</h3>";
+    html += "</div>";
+    html += thumbHTML;
+    html += "</div>";
+
+    /* Vocab */
+    html += vocabHTML;
+
+    /* Summary */
+    html += '<p class="text-sm md:text-base leading-relaxed text-gray-600 dark:text-gray-400 mb-1">' + esc(summary) + "</p>";
+
+    /* Questions */
+    html += qHTML;
+
+    /* Link */
+    html += '<a href="' + esc(article.link) + '" target="_blank" rel="noopener" class="source-link inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg mt-4 no-underline">';
+    html += '<i class="fa-solid fa-arrow-up-right-from-square"></i> Read Full Article on ' + esc(article.source) + "</a>";
+
+    html += "</div>";
+  });
+
+  document.getElementById("results").innerHTML = html;
+}
+
+/* ========================================
+   UI HELPERS
+   ======================================== */
+function showStatus(text) {
+  document.getElementById("statusArea").classList.remove("hidden");
+  document.getElementById("statusText").textContent = text;
+}
+function hideStatus() {
+  document.getElementById("statusArea").classList.add("hidden");
+}
+function showError(text) {
+  document.getElementById("errorArea").classList.remove("hidden");
+  document.getElementById("errorText").textContent = text;
+  document.getElementById("results").innerHTML = "";
+}
+function hideError() {
+  document.getElementById("errorArea").classList.add("hidden");
+}
+function resetBtn() {
+  isFetching = false;
+  var btn = document.getElementById("fetchBtn");
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fa-solid fa-rss"></i> Fetch &amp; Learn';
+}
+
+/* ========================================
+   FETCH SINGLE FEED via rss2json.com
+   ======================================== */
+async function fetchOneFeed(feedSource) {
+  var url = RSS2JSON + encodeURIComponent(feedSource.feed);
+  var resp = await fetch(url);
+  if (!resp.ok) throw new Error("HTTP " + resp.status);
+  var data = await resp.json();
+  if (data.status !== "ok" || !data.items || data.items.length === 0) {
+    throw new Error("No items");
+  }
+  return data.items.map(function(item) {
+    return {
+      title: stripHTML(item.title || ""),
+      link: item.link || "",
+      description: stripHTML(item.description || item.content || ""),
+      pubDate: item.pubDate || "",
+      thumbnail: item.thumbnail || (item.enclosure && item.enclosure.link) || "",
+      source: feedSource.name,
+      sourceIcon: feedSource.icon,
+      sourceColor: feedSource.color
+    };
+  }).filter(function(a) {
+    return a.title.length > 10 && a.description.length > 30;
+  });
+}
+
+/* ========================================
+   MAIN FETCH & FILTER LOGIC
+   ======================================== */
+async function doFetch() {
+  if (isFetching) return;
+  isFetching = true;
+
+  var btn = document.getElementById("fetchBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<div class="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div> Fetching\u2026';
+
+  hideError();
+  document.getElementById("results").innerHTML = renderSkeletons();
+
+  /* Determine topic, keywords, and feeds to query */
+  var custom = document.getElementById("customTopic").value.trim();
+  var topicLabel, keywords, feedIndices;
+
+  if (custom) {
+    topicLabel = custom;
+    keywords = custom.toLowerCase().split(/\s+/).filter(function(w) { return w.length > 1; });
+    if (keywords.length > 1) keywords.unshift(custom.toLowerCase());
+    /* Search all feeds for custom topics */
+    feedIndices = FEEDS.map(function(_, i) { return i; });
+  } else if (selectedIndex >= 0 && selectedIndex < TOPICS.length) {
+    var topic = TOPICS[selectedIndex];
+    topicLabel = topic.label;
+    keywords = topic.keywords;
+    feedIndices = topic.feedIdx;
+  } else {
+    topicLabel = "General";
+    keywords = ["news", "world", "today"];
+    feedIndices = [0, 1, 2, 3, 4];
+  }
+
+  showStatus("Fetching RSS feeds from " + feedIndices.length + " sources\u2026");
+
+  /* Fetch all selected feeds in parallel */
+  var feedPromises = feedIndices.map(function(idx) {
+    return fetchOneFeed(FEEDS[idx]).catch(function() { return []; });
+  });
+
+  try {
+    var feedResults = await Promise.all(feedPromises);
+
+    showStatus("Filtering articles by relevance\u2026");
+    await new Promise(function(r) { setTimeout(r, 200); });
+
+    /* Combine all articles from all feeds */
+    var allArticles = [];
+    feedResults.forEach(function(items) {
+      allArticles = allArticles.concat(items);
+    });
+
+    if (allArticles.length === 0) {
+      throw new Error("Could not load articles from any feed. Please try again later.");
+    }
+
+    /* Score each article by keyword relevance */
+    allArticles.forEach(function(a) {
+      a._score = scoreArticle(a.title, a.description, keywords);
+    });
+
+    /* Sort by relevance score descending, then by date */
+    allArticles.sort(function(a, b) {
+      if (b._score !== a._score) return b._score - a._score;
+      return new Date(b.pubDate || 0) - new Date(a.pubDate || 0);
+    });
+
+    /* Pick top articles, preferring source diversity */
+    var picked = [];
+    var usedSources = {};
+    var usedTitles = {};
+
+    /* First pass: highest-scoring from different sources */
+    for (var i = 0; i < allArticles.length && picked.length < 3; i++) {
+      var art = allArticles[i];
+      var titleKey = art.title.toLowerCase().substring(0, 50);
+      if (usedSources[art.source] || usedTitles[titleKey]) continue;
+      if (art._score > 0 || !custom) {
+        picked.push(art);
+        usedSources[art.source] = true;
+        usedTitles[titleKey] = true;
+      }
+    }
+
+    /* Second pass: allow same source if needed */
+    if (picked.length < 3) {
+      for (var j = 0; j < allArticles.length && picked.length < 3; j++) {
+        var art2 = allArticles[j];
+        var titleKey2 = art2.title.toLowerCase().substring(0, 50);
+        if (usedTitles[titleKey2]) continue;
+        picked.push(art2);
+        usedTitles[titleKey2] = true;
+      }
+    }
+
+    if (picked.length === 0) {
+      throw new Error("No matching articles found for \u201C" + topicLabel + "\u201D. Try a different topic or check back later.");
+    }
+
+    hideStatus();
+    renderInsights(picked, topicLabel);
+
+  } catch (err) {
+    hideStatus();
+    showError(err.message || "Something went wrong. Please try again.");
+  }
+
+  resetBtn();
+}
+
+/* ========================================
+   EVENT LISTENERS
+   ======================================== */
+document.getElementById("fetchBtn").addEventListener("click", doFetch);
+
+document.getElementById("customTopic").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") doFetch();
+});
+
+document.getElementById("customTopic").addEventListener("input", function() {
+  if (this.value.trim()) {
+    document.querySelectorAll(".topic-pill").forEach(function(p) { p.classList.remove("active"); });
+    selectedIndex = -1;
+  } else {
+    var first = document.querySelector(".topic-pill");
+    if (first) {
+      first.classList.add("active");
+      selectedIndex = 0;
+    }
+  }
+});
+
+/* ===== INIT ===== */
+renderTopicPills();
+</script>
+</body>
+</html>
