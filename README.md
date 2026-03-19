@@ -1,5 +1,5 @@
 
-# TaskWizard Project
+# TaskWizard PROJECT
 
 A modern AI chatbot interface powered by Wikipedia. 
 
