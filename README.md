@@ -15,7 +15,14 @@ A modern AI chatbot interface powered by Wikipedia.
 [TaskWizard AI](https://ilkaysen18.github.io/ai-chatbot/)
 
 
-# NEW AI CHAT BOT
+# AI CHAT BOT UI
 
 ## See website here:
-[AI CHATBOT](https://ilkaysen18.github.io/ai-chatbot/new/)
+[AI CHATBOT UI](https://ilkaysen18.github.io/ai-chatbot/new2)
+
+
+# AI PROJECT 
+
+## See website here:
+[LiveEnglish](https://ilkaysen18.github.io/ai-chatbot/LiveEnglish)
+
